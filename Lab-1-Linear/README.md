@@ -46,7 +46,7 @@ Pliki źródłowe:
    * tests/LinkedListsTests.cpp - testy jednostkowe klasy LinkedList (można dopisywać nowe).
    * tests/test_main.cpp - plik wymagany do stworzenia aplikacji wykonującej testy jednostkowe.
 
-Uwagi
+Uwagi:
 -----------------------------
   * Testy nie są testami czarnej-skrzynki, ale testami "od programisty dla programisty", mającymi
     pomóc w implementacji. Nie są więc złośliwe, ale jak najbardziej zbliżone do takich,
@@ -73,5 +73,6 @@ Uwagi
   * Przełączanie się pomiędzy trybami budowania "Debug" i "Release" wymaga otwarcia dwóch instancji
     CodeBlocks, ale obydwie wykorzystywać będą te same pliki źródłowe.
     
-    
+Testy:
+------------------------------    
 ->> profiler, mierzenie czasu przed i po wstawieniem, ststem clock. dla 100 1000 10000
