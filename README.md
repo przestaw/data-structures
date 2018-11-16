@@ -72,3 +72,6 @@ Uwagi
     przeglądanie widoku błędów "Build messages" powinno być sprawdzenie zawartości okna "Build Log".
   * Przełączanie się pomiędzy trybami budowania "Debug" i "Release" wymaga otwarcia dwóch instancji
     CodeBlocks, ale obydwie wykorzystywać będą te same pliki źródłowe.
+    
+    
+->> profiler, mierzenie czasu przed i po wstawieniem, ststem clock. dla 100 1000 10000
