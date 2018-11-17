@@ -1,0 +1,23 @@
+Start testing: Nov 17 21:53 CET
+----------------------------------------------------------
+1/1 Testing: boostUnitTestsRun
+1/1 Test: boostUnitTestsRun
+Command: "/home/przemek/AISDI/Lab-1-Linear/cmake-build-debug/tests/aisdiLinearTests"
+Directory: /home/przemek/AISDI/Lab-1-Linear/cmake-build-debug/tests
+"boostUnitTestsRun" start time: Nov 17 21:53 CET
+Output:
+----------------------------------------------------------
+Running 256 test cases...
+unknown location(0): fatal error in "GivenCollection_WhenCreatedWithDefaultConstructor_ThenItIsEmpty<i>": signal: SIGABRT (application abort requested)
+unknown location(0): fatal error in "GivenCollection_WhenCreatedWithDefaultConstructor_ThenItIsEmpty<m>": memory access violation at address: 0x00000007: no mapping at fault address
+
+*** 2 failures detected in test suite "aisdi_linear_tests"
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Failed.
+"boostUnitTestsRun" end time: Nov 17 21:53 CET
+"boostUnitTestsRun" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 17 21:53 CET
