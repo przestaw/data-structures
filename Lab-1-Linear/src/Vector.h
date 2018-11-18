@@ -73,9 +73,10 @@ public:
   ~Vector()
   {
     delete[] vec_table;
+    vec_table = nullptr;
   }
 private:
-  void resize()//bool enlarge = true)
+  void resize()
   {
     Type * temp;
     size += def_size;

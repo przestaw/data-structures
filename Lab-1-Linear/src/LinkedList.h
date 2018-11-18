@@ -15,7 +15,7 @@ struct Node
   Node *prev;
   Node *next;
 
-  Node()
+  ~Node()
   {
     next = nullptr;
     prev = nullptr;
@@ -54,9 +54,9 @@ public:
     first=new Node<Type>(Type{});
     last=new Node<Type>(Type{});
     last->next= nullptr;
-    first->previous= nullptr;
+    first->prev= nullptr;
     first->next=last;
-    last->previous=first;
+    last->prev=first;
   }
 
   LinkedList(std::initializer_list<Type> l):
@@ -73,8 +73,8 @@ public:
   LinkedList(const LinkedList& other):
           LinkedList()
   {
-    auto iter = l.begin();
-    while(iter != l.end())
+    auto iter = other.begin();
+    while(iter != other.end())
     {
       this->append(*iter);
       iter++;
@@ -85,11 +85,11 @@ public:
           LinkedList()
   {
     first->next = other.first->next;
-    last->previous = other.last->previous;
-    other.first->next->previous = first;
-    other.last->previous->next = last;
+    last->prev = other.last->prev;
+    other.first->next->prev = first;
+    other.last->prev->next = last;
     other.first->next = other.last;
-    other.last->previous = other.first;
+    other.last->prev = other.first;
   }
 
   ~LinkedList()
@@ -101,19 +101,35 @@ public:
 
   LinkedList& operator=(const LinkedList& other)
   {
-    (void)other;
-    throw std::runtime_error("TODO");
+      this->erase(this->begin(), this->end());
+
+      for(auto iter = other.begin(); iter != (other.end()); ++iter)
+      {
+          this->append(*iter);
+      }
+      return *this;
   }
 
   LinkedList& operator=(LinkedList&& other)
   {
-    (void)other;
-    throw std::runtime_error("TODO");
+      this->erase(this->begin(), this->end());
+      
+      first->next=other.first->next;
+      last->prev=other.last->prev;
+      
+      other.first->next->prev=first;
+      other.last->prev->next=last;
+      
+      
+      other.first->next= other.last;
+      other.last->prev= other.first;
+      
+      return *this;
   }
 
   bool isEmpty() const
   {
-    if(first->next==last)
+    if(first->next == last)
     {
       return true;
     }else
@@ -124,61 +140,97 @@ public:
 
   size_type getSize() const
   {
-    throw std::runtime_error("TODO");
+    if(isEmpty())
+    {
+        return 0;
+    }else
+    {
+        Node<Type> * ptr;
+        size_type count = 0;
+        for(ptr = first; ptr->next != last; ptr = ptr->next)
+        {
+            count++;
+        }
+        return count;
+    }
   }
 
   void append(const Type& item)
   {
-    (void)item;
-    throw std::runtime_error("TODO");
+      Node<Type>* newElement= new Node<Type>(item);
+      Node<Type>* temp = last->prev;
+
+      last->prev = newElement;
+      newElement->next = last;
+      newElement->prev = temp;
+
+      temp->next = newElement;
   }
 
   void prepend(const Type& item)
   {
-    (void)item;
-    throw std::runtime_error("TODO");
+      Node<Type>* newElement= new Node<Type>(item);
+      Node<Type>* temp = first->next;
+
+      first->next = newElement;
+      newElement->next = temp;
+      newElement->prev = first;
+
+      temp->prev = newElement;
   }
 
   void insert(const const_iterator& insertPosition, const Type& item)
   {
-    (void)insertPosition;
-    (void)item;
-    throw std::runtime_error("TODO");
+      Node<Type>* newElement = new Node<Type>(item);
+      Node<Type>* behind = insertPosition.getActual()->prev;
+      
+      newElement->next = insertPosition.getActual();
+      newElement->prev = behind;
+      behind->next = newElement;
+      insertPosition.getActual()->prev = newElement;
   }
 
   Type popFirst()
   {
     if(this->isEmpty())
     {
-      throw std::out_of_range("Vector: Can't pop from empty list");
+      throw std::out_of_range("List: Can't pop from empty list");
     }
-    throw std::runtime_error("TODO");
+
+    auto temp = first->next;
+    erase(begin());
+
+    return temp->data;
   }
 
   Type popLast()
   {
     if(this->isEmpty())
     {
-      throw std::out_of_range("Vector: Can't pop from empty list");
+      throw std::out_of_range("List: Can't pop from empty list");
     }
-    throw std::runtime_error("TODO");
+
+    auto temp = last->prev;
+    erase(end());
+
+    return temp->data;
   }
 
   void erase(const const_iterator& possition)
   {
-    if(possition.pter->next==nullptr || possition.pter->previous==nullptr)
+    if(possition.getActual()->next == nullptr || possition.getActual()->prev == nullptr)
     {
-      throw std::out_of_range("Vector: Can't delete sentinel");
+      throw std::out_of_range("List: Can't delete sentinel");
     }
 
-    possition.pter->next->previous = possition.pter->previous;
-    possition.pter->previous->next = possition.pter->next;
-    delete possition.pter;
+    possition.getActual()->next->prev = possition.getActual()->prev;
+    possition.getActual()->prev->next = possition.getActual()->next;
+    delete possition.getActual();
   }
 
   void erase(const const_iterator& firstIncluded, const const_iterator& lastExcluded)
   {
-      auto iter_point;
+      auto iter_point = firstIncluded + 1;
       for(auto iter = firstIncluded; iter != lastExcluded; )
       {
           iter_point = iter + 1;
@@ -242,7 +294,7 @@ public:
   using pointer = typename LinkedList::const_pointer;
   using reference = typename LinkedList::const_reference;
 private:
-  Node<Type>* actual;
+  Node<Type> *actual;
 public:
   explicit ConstIterator()
   {}
@@ -252,9 +304,14 @@ public:
      this->actual = actual;
   }
 
+  Node<Type>* getActual() const
+  {
+      return (actual);
+  }
+
   reference operator*() const
   {
-      if(actual->next==nullptr || actual->previous==nullptr)
+      if(actual->next==nullptr || actual->prev==nullptr)
       {
           throw std::out_of_range("List: Can't get data from sentinel");
       }else
@@ -316,19 +373,47 @@ public:
 
   ConstIterator operator+(difference_type d) const
   {
-      (void)d;
-      throw std::runtime_error("TODO");
+      ConstIterator temp = *this;
+      if(d>=0)
+          while(d>0)
+          {
+              --d;
+              ++temp;
+              if(temp.actual == nullptr) throw std::out_of_range("List: Can't go forward - last  sentinel" );
+          }
+      else
+          while(d<0)
+          {
+              ++d;
+              --temp;
+              if(temp.actual == nullptr) throw std::out_of_range("List: Can't go backward - first  sentinel" );
+          }
+      return temp;
   }
 
   ConstIterator operator-(difference_type d) const
   {
-    (void)d;
-    throw std::runtime_error("TODO");
+      ConstIterator temp = *this;
+      if(d<=0)
+          while(d<0)
+          {
+              ++d;
+              --temp;
+              if(temp.actual == nullptr) throw std::out_of_range("List: Can't go forward - last  sentinel" );
+          }
+      else
+          while(d>0)
+          {
+              --d;
+              --temp;
+              if(temp.actual == nullptr) throw std::out_of_range("List: Can't go backward - first  sentinel" );
+          }
+      return temp;
   }
 
   bool operator==(const ConstIterator& other) const
   {
-      if(this->actual == other)
+      if(this->actual == other.actual)
       {
           return true;
       }else
@@ -339,7 +424,7 @@ public:
 
   bool operator!=(const ConstIterator& other) const
   {
-      if(this->actual != other)
+      if(this->actual != other.actual)
       {
           return true;
       }else
