@@ -5,6 +5,8 @@
 #include <initializer_list>
 #include <stdexcept>
 
+#define ALLOC_SIZE 50
+
 namespace aisdi
 {
 
@@ -25,63 +27,17 @@ public:
   using iterator = Iterator;
   using const_iterator = ConstIterator;
 private:
-  const size_type def_size = 5;
+
   size_type size;
   size_type count;
   Type * vec_table;
-public:
-  Vector():
-    size(0), count(0)
-  {
-    resize();
-  }
 
-  Vector(std::initializer_list<Type> l)
-  {
-    count = l.size();
-    size = count + 1;
-    vec_table = new Type[size];
-    auto list = l.begin();
-    for(size_type i = 0; i < count; i++)
-    {
-      vec_table[i] = *(list);
-      list++;
-    }
-  }
-
-  Vector(const Vector& other)
-  {
-    this->size = other.size;
-    this->count = other.count;
-    vec_table = new Type[size];
-    for(size_type i = 0; i < size; i++)
-    {
-      this->vec_table[i] = other.vec_table[i];
-    }
-  }
-
-  Vector(Vector&& other)
-  {
-    this->size = other.size;
-    this->count = other.count;
-    this->vec_table = other.vec_table;
-    other.size = 0;
-    other.count = 0;
-    other.vec_table = new Type[def_size]; //maybe alocate anything to ensure destructor has anything to delete
-  }
-
-  ~Vector()
-  {
-    delete[] vec_table;
-    vec_table = nullptr;
-  }
-private:
   void resize()
   {
     Type * temp;
-    size += def_size;
+    size = size + ALLOC_SIZE;
     temp = new Type[size];
-    for(size_type i = 0; i < size; i++)
+    for(int i = 0; i < (int)size; i++)
     {
       temp[i] = vec_table[i];
     }
@@ -90,36 +46,98 @@ private:
   }
 
 public:
+  Vector():
+    size(0), count(0)
+  {
+    vec_table = new value_type[ALLOC_SIZE];
+  }
+
+  Vector(std::initializer_list<Type> l)
+  {
+    count = 0;
+    size =  l.size() + 1;
+
+    vec_table = new Type[size];
+
+    auto list = l.begin();
+    while(list != l.end())
+    {
+        this->append(*list);
+        ++list;
+    }
+  }
+
+  Vector(const Vector& other)
+  {
+    count = 0;
+    size =  other.getSize() + 1;
+
+    vec_table = new Type[size];
+
+    auto vec = other.begin();
+    while(vec != other.end())
+    {
+        this->append(*vec);
+        ++vec;
+    }
+  }
+
+  Vector(Vector&& other)
+  {
+    this->size = other.size;
+    this->count = other.count;
+    this->vec_table = other.vec_table;
+
+    other.size = 0;
+    other.count = 0;
+    other.vec_table = new Type[ALLOC_SIZE];
+    //maybe alocate anything to ensure destructor has anything to delete?
+  }
+
+  ~Vector()
+  {
+    delete[] vec_table;
+  }
+
   Vector& operator=(const Vector& other)
   {
     if(this == &other)
-      {return *this;}
+    {
+      return *this;
+    }
 
     delete[] vec_table;
-    this->count = other.count;
-    this->size = other.size;
+    this->count = 0;
+    this->size = other.size + 1;
     this->vec_table = new Type[size];
 
-    for(size_type i = 0; i< this->count; i++)
+    auto vec = other.begin();
+    while(vec != other.end())
     {
-      this->vec_table[i] = other.vec_table[i];
+        this->append(*vec);
+        ++vec;
     }
+
     return *this;
   }
 
   Vector& operator=(Vector&& other)
   {
     if(this == &other)
-      {return *this;}
+    {
+      return *this;
+    }
 
     delete[] vec_table;
-    this->count = other.count;
+
     this->size = other.size;
-    delete[] this->vec_table;
+    this->count = other.count;
     this->vec_table = other.vec_table;
+
     other.size = 0;
     other.count = 0;
-    other.vec_table = nullptr;
+    other.vec_table = new Type[ALLOC_SIZE];
+
     return *this;
   }
 
@@ -146,7 +164,7 @@ public:
       resize();
     }
     vec_table[count] = item;
-    ++count;
+    count++;
   }
 
   void prepend(const Type& item)
@@ -156,11 +174,31 @@ public:
 
   void insert(const const_iterator& insertPosition, const Type& item)
   {
-    if(insertPosition == end())
+    if(this->size < insertPosition.position)
     {
-      append(item);
+      throw std::logic_error("Vector: Can't insert outside vector");
+    }
+
+    if(insertPosition == cend())
+    {
+      append(item); //resize already in place
     }else
     {
+      if(size == count)
+      {
+        resize();
+      }
+
+      int where = insertPosition.position;
+      int i = count;
+      while(i > where)
+      {
+          vec_table[i] = vec_table[i-1];
+          i--;
+      }
+      vec_table[where] = item;
+      count++;
+      /*
       if(size == count)
       {
         resize();
@@ -168,8 +206,9 @@ public:
       ++count;
       for(ConstIterator it = end(); it != insertPosition; it--)
       {
-        vec_table[it.getPosition()] = vec_table[it.getPosition() - 1];
+        vec_table[it.position] = vec_table[it.position - 1];
       }
+      */
     }
   }
 
@@ -180,11 +219,13 @@ public:
       throw std::out_of_range("Vector: Can't pop from empty vector");
     }
     Type ret = vec_table[0];
-    count--;
-    for(size_type i = 0; i < count; i++)
+
+    for(int i = 0; i < (int)count-1; i++)
     {
       vec_table[i] = vec_table[i+1];
     }
+
+    count--;
     return ret;
   }
 
@@ -194,23 +235,27 @@ public:
     {
       throw std::out_of_range("Vector: Can't pop from empty vector");
     }
+    Type ret = vec_table[count-1];
+
     count--;
-    return vec_table[count];
+    return ret;
   }
 
   void erase(const const_iterator& possition)
   {
-    if(this->isEmpty() || possition.getPosition() >= count)
+    if(this->isEmpty() || possition.position >= count)
     {
       throw std::out_of_range("Vector: Can't erase element because of no element");
     }
 
-    size_type delete_position = possition.getPosition() - 1;
+    int delete_position = possition.position;
 
-    for(ConstIterator it = end(); it.getPosition() != delete_position; it--)
+    for(int i = delete_position; i < (int)count; i++)
     {
-      vec_table[it.getPosition()-1] = vec_table[it.getPosition()];
+      vec_table[i] = vec_table[i+1];
     }
+
+    count--;
   }
 
   void erase(const const_iterator& firstIncluded, const const_iterator& lastExcluded)
@@ -220,13 +265,13 @@ public:
       return; //nothing to delete
     }
 
-    if(this->isEmpty())// || firstIncluded.getPosition() >= count || lastExcluded.getPosition() >= count)
+    if(this->isEmpty())// || firstIncluded.position >= count || lastExcluded.position >= count)
     {
       throw std::out_of_range("Vector: Can't erase elements - out of range");
     }
 
-    size_type begin_delete = firstIncluded.getPosition();
-    size_type end_delete_inc = lastExcluded.getPosition();
+    size_type begin_delete = firstIncluded.position;
+    size_type end_delete_inc = lastExcluded.position;
 
     if(begin_delete>=end_delete_inc)
     {
@@ -238,12 +283,17 @@ public:
 
     while(end_delete_inc < count)
     {
-      vec_table[begin_delete] = vec_table[begin_delete];
+      vec_table[begin_delete] = vec_table[end_delete_inc];
       begin_delete++;
       end_delete_inc++;
     }
 
-    count -= diff;
+    //TODO : Delete loop below
+    while (end_delete_inc > begin_delete) {
+        this->popLast();
+        end_delete_inc--;
+    }
+    //count = count - diff;
   }
 
   iterator begin()
@@ -258,13 +308,13 @@ public:
 
   const_iterator cbegin() const
   {
-    return  ConstIterator(this, vec_table, 0);
+    return  ConstIterator(this, &(vec_table[0]), 0);
   }
 
   const_iterator cend() const
   {
     //point first empty place
-    return  ConstIterator(this, (vec_table + count), count);
+    return  ConstIterator(this, &(vec_table[count]), count);
   }
 
   const_iterator begin() const
@@ -287,8 +337,8 @@ public:
   using difference_type = typename Vector::difference_type;
   using pointer = typename Vector::const_pointer;
   using reference = typename Vector::const_reference;
-private:
-  const aisdi::Vector<Type>* vector;
+//protected:
+  const Vector<Type>* vector;
   Type* current;
   size_type position;
 public:
@@ -297,27 +347,29 @@ public:
     vector(nullptr), current(nullptr), position(0)
   {}
 
-  ConstIterator(const Vector<Type>* vector_c = nullptr, Type* current_c = nullptr, size_type position_c = 0):
+  ConstIterator(const Vector<Type>* vector_c, Type* current_c, size_type position_c):
       vector(vector_c), current(current_c), position(position_c)
   {}
-
+/*
   ConstIterator(const ConstIterator &other)
   {
     this->current = other.current;
     this->vector = other.vector;
     this->position = other.position;
   }
+*/
 
-  size_type getPosition() const
+/*
+  size_type getPosition const
   {
     return position;
   }
-
+*/
   reference operator*() const
   {
     if(position >= vector->getSize() || position < 0)
     {
-      throw std::out_of_range("ConstIterator: this in not object in Vector");
+      throw std::out_of_range("Vector::ConstIterator: this in not object in Vector - op*");
     }else
     {
       return *current;
@@ -328,7 +380,7 @@ public:
   {
     if(position >= vector->getSize())
     {
-      throw std::out_of_range("ConstIterator: this in not place in Vector");
+      throw std::out_of_range("Vector::ConstIterator: this in not place in Vector - ++op");
     }else
     {
       current++;
@@ -341,7 +393,7 @@ public:
   {
     if(position >= vector->getSize())
     {
-      throw std::out_of_range("ConstIterator: this in not place in Vector");
+      throw std::out_of_range("Vector::ConstIterator: this in not place in Vector - op++");
     }else
     {
       ConstIterator ret = *this;
@@ -355,7 +407,7 @@ public:
   {
     if(position <= 0)
     {
-      throw std::out_of_range("ConstIterator: this in not place in Vector");
+      throw std::out_of_range("Vector::ConstIterator: this in not place in Vector - --op");
     }else
     {
       current--;
@@ -368,7 +420,7 @@ public:
   {
     if(position <= 0)
     {
-      throw std::out_of_range("ConstIterator: this in not place in Vector");
+      throw std::out_of_range("Vector::ConstIterator: this in not place in Vector - op--");
     }else
     {
       ConstIterator ret = *this;
@@ -380,27 +432,26 @@ public:
 
   ConstIterator operator+(difference_type d) const
   {
-    size_type dif = static_cast<int_fast64_t >(d);
-    if(position + d >= vector->getSize())
+    size_type dif = static_cast<size_type>(d);
+    if(position + d > vector->getSize())
     {
-      throw std::out_of_range("ConstIterator: this in not place in Vector");
+      throw std::out_of_range("ConstIterator: this in not place in Vector - op+");
     }else
     {
-      return ConstIterator(vector, current + dif, position + dif);
+      size_type new_size = (position + dif);
+      return ConstIterator(vector, &(vector->vec_table[position + dif]), new_size);
     }
   }
 
   ConstIterator operator-(difference_type d) const
   {
-    size_type dif = static_cast<int_fast64_t>(d);
+    size_type dif = static_cast<size_type>(d);
     if(position - d < 0)
     {
-      throw std::out_of_range("ConstIterator: this in not place in Vector");
+      throw std::out_of_range("ConstIterator: this in not place in Vector - op-");
     }else
     {
-      //current -= dif;
-      //position -= dif;
-      return ConstIterator(vector, current - dif, position - dif);
+      return ConstIterator(vector, &(vector->vec_table[position - dif]), (position - dif));
     }
   }
 

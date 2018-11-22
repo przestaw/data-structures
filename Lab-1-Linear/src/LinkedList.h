@@ -15,7 +15,7 @@ struct Node
   Node *prev;
   Node *next;
 
-  ~Node()
+  Node()
   {
     next = nullptr;
     prev = nullptr;
@@ -101,6 +101,11 @@ public:
 
   LinkedList& operator=(const LinkedList& other)
   {
+      if(this == &other)
+      {
+          return *this;
+      }
+
       this->erase(this->begin(), this->end());
 
       for(auto iter = other.begin(); iter != (other.end()); ++iter)
@@ -112,18 +117,23 @@ public:
 
   LinkedList& operator=(LinkedList&& other)
   {
+      if(this == &other)
+      {
+          return *this;
+      }
+
       this->erase(this->begin(), this->end());
-      
+
       first->next=other.first->next;
       last->prev=other.last->prev;
-      
+
       other.first->next->prev=first;
       other.last->prev->next=last;
-      
-      
+
+
       other.first->next= other.last;
       other.last->prev= other.first;
-      
+
       return *this;
   }
 
@@ -183,7 +193,7 @@ public:
   {
       Node<Type>* newElement = new Node<Type>(item);
       Node<Type>* behind = insertPosition.getActual()->prev;
-      
+
       newElement->next = insertPosition.getActual();
       newElement->prev = behind;
       behind->next = newElement;
@@ -194,7 +204,7 @@ public:
   {
     if(this->isEmpty())
     {
-      throw std::out_of_range("List: Can't pop from empty list");
+      throw std::logic_error("List: Can't pop from empty list");
     }
 
     auto temp = first->next;
@@ -207,35 +217,36 @@ public:
   {
     if(this->isEmpty())
     {
-      throw std::out_of_range("List: Can't pop from empty list");
+      throw std::logic_error("List: Can't pop from empty list");
     }
 
     auto temp = last->prev;
-    erase(end());
+    erase(end()-1);
 
     return temp->data;
   }
 
   void erase(const const_iterator& possition)
   {
-    if(possition.getActual()->next == nullptr || possition.getActual()->prev == nullptr)
+    Node<Type> * temp = possition.getActual();
+    if(temp->next == nullptr || temp->prev == nullptr)
     {
       throw std::out_of_range("List: Can't delete sentinel");
     }
 
-    possition.getActual()->next->prev = possition.getActual()->prev;
-    possition.getActual()->prev->next = possition.getActual()->next;
-    delete possition.getActual();
+    temp->next->prev = temp->prev;
+    temp->prev->next = temp->next;
+    delete temp;
   }
 
   void erase(const const_iterator& firstIncluded, const const_iterator& lastExcluded)
   {
-      auto iter_point = firstIncluded + 1;
-      for(auto iter = firstIncluded; iter != lastExcluded; )
+      auto current = firstIncluded;
+      while(current != lastExcluded)
       {
-          iter_point = iter + 1;
-          this->erase(iter);
-          iter=iter_point;
+          auto temp  = current;
+          current++;
+          erase(temp);
       }
   }
 
@@ -296,13 +307,13 @@ public:
 private:
   Node<Type> *actual;
 public:
-  explicit ConstIterator()
+  explicit ConstIterator():
+    actual(nullptr)
   {}
 
-  ConstIterator(Node<Type>* actual)
-  {
-     this->actual = actual;
-  }
+  ConstIterator(Node<Type>* actual_c):
+    actual(actual_c)
+  {}
 
   Node<Type>* getActual() const
   {
@@ -313,7 +324,7 @@ public:
   {
       if(actual->next==nullptr || actual->prev==nullptr)
       {
-          throw std::out_of_range("List: Can't get data from sentinel");
+          throw std::out_of_range("ConstIterator::List: Can't get data from sentinel - op*");
       }else
       {
           return actual->data;
@@ -322,52 +333,53 @@ public:
 
   ConstIterator& operator++()
   {
-     if(actual->next!=nullptr)
+     if(actual->next == nullptr)
      {
-       actual=actual->next;
-       return *this;
+         throw std::out_of_range("ConstIterator::List: Can't go further - ++op");
+
      }else
      {
-       throw std::out_of_range("List: Can't go further");
+         actual=actual->next;
+         return *this;
      }
   }
 
   ConstIterator operator++(int)
   {
-      if(actual->next!=nullptr)
+      if(actual->next == nullptr)
+      {
+          throw std::out_of_range("ConstIterator::List: Can't go further - op++");
+      }else
       {
           ConstIterator ret = *this;
           actual=actual->next;
           return ret;
-      }else
-      {
-         throw std::out_of_range("List: Can't go further");
       }
 
   }
 
   ConstIterator& operator--()
   {
-    if(actual->prev!=nullptr)
+    if(actual->prev->prev == nullptr)
     {
-       actual=actual->prev;
-       return *this;
+        throw std::out_of_range("ConstIterator::List: Can't go further - --op");
     }else
     {
-      throw std::out_of_range("List: Can't go further");
+        actual=actual->prev;
+        return *this;
     }
   }
 
   ConstIterator operator--(int)
   {
-     if(actual->prev!=nullptr)
+     if(actual->prev->prev == nullptr)
      {
-       ConstIterator ret = *this;
-       actual=actual->prev;
-       return ret;
+         throw std::out_of_range("ConstIterator::List: Can't go further - op--");
      }else
      {
-       throw std::out_of_range("List: Can't go further");
+         ConstIterator ret = *this;
+         actual=actual->prev;
+         return ret;
      }
   }
 
@@ -379,14 +391,14 @@ public:
           {
               --d;
               ++temp;
-              if(temp.actual == nullptr) throw std::out_of_range("List: Can't go forward - last  sentinel" );
+              if(temp.actual == nullptr) throw std::out_of_range("ConstIterator::List: Can't go forward - last  sentinel" );
           }
       else
           while(d<0)
           {
               ++d;
               --temp;
-              if(temp.actual == nullptr) throw std::out_of_range("List: Can't go backward - first  sentinel" );
+              if(temp.actual == nullptr) throw std::out_of_range("ConstIterator::List: Can't go backward - first  sentinel" );
           }
       return temp;
   }
@@ -399,14 +411,14 @@ public:
           {
               ++d;
               --temp;
-              if(temp.actual == nullptr) throw std::out_of_range("List: Can't go forward - last  sentinel" );
+              if(temp.actual == nullptr) throw std::out_of_range("ConstIterator::List: Can't go forward - last  sentinel");
           }
       else
           while(d>0)
           {
               --d;
               --temp;
-              if(temp.actual == nullptr) throw std::out_of_range("List: Can't go backward - first  sentinel" );
+              if(temp.actual == nullptr) throw std::out_of_range("ConstIterator::List: Can't go backward - first  sentinel" );
           }
       return temp;
   }
