@@ -5,7 +5,7 @@
 #include <initializer_list>
 #include <stdexcept>
 
-#define ALLOC_SIZE 50
+#define ALLOC_SIZE 150
 
 namespace aisdi
 {
@@ -55,7 +55,7 @@ public:
   Vector(std::initializer_list<Type> l)
   {
     count = 0;
-    size =  l.size() + 1;
+    size =  l.size();
 
     vec_table = new Type[size];
 
@@ -70,33 +70,41 @@ public:
   Vector(const Vector& other)
   {
     count = 0;
-    size =  other.getSize() + 1;
+    size =  other.getSize();
 
     vec_table = new Type[size];
 
+    for (int i = 0; i < (int) other.size; ++i)
+    {
+        this->append(other.vec_table[i]);
+    }
+    /*
     auto vec = other.begin();
     while(vec != other.end())
     {
         this->append(*vec);
         ++vec;
     }
+     */
   }
 
-  Vector(Vector&& other)
+  Vector(Vector&& other)//:
+    //Vector()     //delegated constructor deleted to fill with test - GivenNonEmptyCollection_WhenMovingToOther_ThenAllItemsAreMoved
   {
-    this->size = other.size;
-    this->count = other.count;
     this->vec_table = other.vec_table;
-
+    other.vec_table = nullptr; //we steal from other
+    this->size = other.size;
     other.size = 0;
+    this->count = other.count;
     other.count = 0;
-    other.vec_table = new Type[ALLOC_SIZE];
-    //maybe alocate anything to ensure destructor has anything to delete?
   }
 
   ~Vector()
   {
-    delete[] vec_table;
+    if(vec_table != nullptr)
+    {
+      delete[] vec_table;
+    }
   }
 
   Vector& operator=(const Vector& other)
@@ -108,16 +116,22 @@ public:
 
     delete[] vec_table;
     this->count = 0;
-    this->size = other.size + 1;
+    this->size = other.size;
     this->vec_table = new Type[size];
 
+    for (int i = 0; i < (int) other.size; ++i)
+    {
+        this->append(other.vec_table[i]);
+    }
+
+/*
     auto vec = other.begin();
     while(vec != other.end())
     {
         this->append(*vec);
         ++vec;
     }
-
+*/
     return *this;
   }
 
@@ -129,15 +143,14 @@ public:
     }
 
     delete[] vec_table;
+    this->size = 0;
+    this->count = 0;
+    //this->vec_table = new Type[ALLOC_SIZE];
+    this->vec_table = nullptr; //we steal form other
 
-    this->size = other.size;
-    this->count = other.count;
-    this->vec_table = other.vec_table;
-
-    other.size = 0;
-    other.count = 0;
-    other.vec_table = new Type[ALLOC_SIZE];
-
+    std::swap(this->vec_table, other.vec_table);
+    std::swap(this->size, other.size);
+    std::swap(this->count, other.count);
     return *this;
   }
 
@@ -287,13 +300,14 @@ public:
       begin_delete++;
       end_delete_inc++;
     }
-
+    /*
     //TODO : Delete loop below
     while (end_delete_inc > begin_delete) {
         this->popLast();
         end_delete_inc--;
     }
-    //count = count - diff;
+    */
+    count = count - diff;
   }
 
   iterator begin()

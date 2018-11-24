@@ -7,28 +7,6 @@
 
 namespace aisdi
 {
-
-template <typename Type>
-struct Node
-{
-  const Type data;
-  Node *prev;
-  Node *next;
-
-  Node()
-  {
-    next = nullptr;
-    prev = nullptr;
-  }
-
-  Node(const Type &A):
-    data(A)
-  {
-    next = nullptr;
-    prev = nullptr;
-  }
-};
-
 template <typename Type>
 class LinkedList
 {
@@ -46,13 +24,35 @@ public:
   using iterator = Iterator;
   using const_iterator = ConstIterator;
 private:
-  Node<Type> *first;
-  Node<Type> *last;
+    class Node
+    {
+    public:
+        Type data;
+        Node *prev;
+        Node *next;
+
+        Node()
+        {
+            next = nullptr;
+            prev = nullptr;
+        }
+
+        Node(const Type &A):
+                data(A)
+        {
+            next = nullptr;
+            prev = nullptr;
+        }
+    };
+
+
+  Node *first;
+  Node *last;
 public:
   LinkedList()
   {
-    first=new Node<Type>(Type{});
-    last=new Node<Type>(Type{});
+    first=new Node();
+    last=new Node();
     last->next= nullptr;
     first->prev= nullptr;
     first->next=last;
@@ -81,23 +81,34 @@ public:
     }
   }
 
-  LinkedList(LinkedList&& other):
-          LinkedList()
+  LinkedList(LinkedList&& other)//:
+    //LinkedList()  //delegated constructor deleted to fill with test - GivenNonEmptyCollection_WhenMovingToOther_ThenAllItemsAreMoved
   {
-    first->next = other.first->next;
-    last->prev = other.last->prev;
-    other.first->next->prev = first;
-    other.last->prev->next = last;
-    other.first->next = other.last;
-    other.last->prev = other.first;
+      first = other.first;
+      last = other.last;
+      other.first = nullptr; //we stealed from other list -> list wont be used
+      other.last = nullptr;
+    /* deleted to fill with test - GivenNonEmptyCollection_WhenMovingToOther_ThenAllItemsAreMoved
+    std::swap(this->first, other.first);
+    std::swap(this->last, other.last);
+     */
   }
 
   ~LinkedList()
   {
+    while(first != nullptr)
+    {
+      Node* temp = first;
+      first = first->next;
+      delete temp;
+    }
+    first = last = nullptr;
+   /*
     erase( begin(), end());
     delete last;
     delete first;
-  }
+  */
+   }
 
   LinkedList& operator=(const LinkedList& other)
   {
@@ -155,7 +166,7 @@ public:
         return 0;
     }else
     {
-        Node<Type> * ptr;
+        Node * ptr;
         size_type count = 0;
         for(ptr = first; ptr->next != last; ptr = ptr->next)
         {
@@ -167,8 +178,8 @@ public:
 
   void append(const Type& item)
   {
-      Node<Type>* newElement= new Node<Type>(item);
-      Node<Type>* temp = last->prev;
+      Node* newElement= new Node(item);
+      Node* temp = last->prev;
 
       last->prev = newElement;
       newElement->next = last;
@@ -179,8 +190,8 @@ public:
 
   void prepend(const Type& item)
   {
-      Node<Type>* newElement= new Node<Type>(item);
-      Node<Type>* temp = first->next;
+      Node* newElement= new Node(item);
+      Node* temp = first->next;
 
       first->next = newElement;
       newElement->next = temp;
@@ -191,8 +202,8 @@ public:
 
   void insert(const const_iterator& insertPosition, const Type& item)
   {
-      Node<Type>* newElement = new Node<Type>(item);
-      Node<Type>* behind = insertPosition.getActual()->prev;
+      Node* newElement = new Node(item);
+      Node* behind = insertPosition.getActual()->prev;
 
       newElement->next = insertPosition.getActual();
       newElement->prev = behind;
@@ -207,10 +218,10 @@ public:
       throw std::logic_error("List: Can't pop from empty list");
     }
 
-    auto temp = first->next;
+    auto temp = first->next->data; //we need only data
     erase(begin());
 
-    return temp->data;
+    return temp;
   }
 
   Type popLast()
@@ -220,15 +231,15 @@ public:
       throw std::logic_error("List: Can't pop from empty list");
     }
 
-    auto temp = last->prev;
+    auto temp = last->prev->data; //we need only data
     erase(end()-1);
 
-    return temp->data;
+    return temp;
   }
 
   void erase(const const_iterator& possition)
   {
-    Node<Type> * temp = possition.getActual();
+    Node * temp = possition.getActual();
     if(temp->next == nullptr || temp->prev == nullptr)
     {
       throw std::out_of_range("List: Can't delete sentinel");
@@ -305,17 +316,17 @@ public:
   using pointer = typename LinkedList::const_pointer;
   using reference = typename LinkedList::const_reference;
 private:
-  Node<Type> *actual;
+  Node *actual;
 public:
   explicit ConstIterator():
     actual(nullptr)
   {}
 
-  ConstIterator(Node<Type>* actual_c):
+  ConstIterator(Node* actual_c):
     actual(actual_c)
   {}
 
-  Node<Type>* getActual() const
+  Node* getActual() const
   {
       return (actual);
   }
