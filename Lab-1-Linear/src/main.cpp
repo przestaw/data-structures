@@ -26,7 +26,7 @@ void prependTest(ListCollection<int> &list, VectorCollection<int> &vec, int coun
 
     std::chrono::duration<double> elapsedSecondsL = end - start;
 	std::time_t end_timeL = std::chrono::system_clock::to_time_t(end);
-    std::cout << "Finished prepend for list - " << count << " elements, time : " << elapsedSecondsL.count() << ",\n at time : " << std::ctime(&end_timeL) << std::endl;
+    std::cout << "Finished prepend for list - " << count << " elements, time : " << elapsedSecondsL.count() << "  - at time : " << std::ctime(&end_timeL) << std::endl;
 
 
   //vector
@@ -40,7 +40,7 @@ void prependTest(ListCollection<int> &list, VectorCollection<int> &vec, int coun
 	std::time_t end_timeV = std::chrono::system_clock::to_time_t(end);
     std::chrono::duration<double> elapsedSecondsV = end - start;
 
-    std::cout << "Finished prepend for vector - " << count << " elements, time : " << elapsedSecondsV.count() << ",\n at time : " << std::ctime(&end_timeV) << std::endl;
+    std::cout << "Finished prepend for vector - " << count << " elements, time : " << elapsedSecondsV.count() << "  - at time : " << std::ctime(&end_timeV) << std::endl;
 }
 
 void appendTest(ListCollection<int> &list, VectorCollection<int> &vec, int count)
@@ -56,7 +56,7 @@ void appendTest(ListCollection<int> &list, VectorCollection<int> &vec, int count
 	std::time_t end_timeL = std::chrono::system_clock::to_time_t(end);
   std::chrono::duration<double> elapsedSecondsL = end - start;
 
-  std::cout << "Finished append for list - " << count << " elements, time : " << elapsedSecondsL.count() << ",\n at time : " << std::ctime(&end_timeL) << std::endl;
+  std::cout << "Finished append for list - " << count << " elements, time : " << elapsedSecondsL.count() << "  - at time : " << std::ctime(&end_timeL) << std::endl;
 
 
   //vector
@@ -70,7 +70,7 @@ void appendTest(ListCollection<int> &list, VectorCollection<int> &vec, int count
 	std::time_t end_timeV = std::chrono::system_clock::to_time_t(end);
   std::chrono::duration<double> elapsedSecondsV = end - start;
 
-  std::cout << "Finished append for vector - " << count << " elements, time : " << elapsedSecondsV.count()  << ",\n at time : " << std::ctime(&end_timeV) << std::endl;
+  std::cout << "Finished append for vector - " << count << " elements, time : " << elapsedSecondsV.count()  << "  - at time : " << std::ctime(&end_timeV) << std::endl;
 }
 
 
@@ -87,7 +87,7 @@ void popFirstTest(ListCollection<int> list, VectorCollection<int> vec, int count
 	std::time_t end_timeL = std::chrono::system_clock::to_time_t(end);
   std::chrono::duration<double> elapsedSecondsL = end - start;
 
-  std::cout << "Finished popFirst for list - " << count << " elements, time : " << elapsedSecondsL.count() << ",\n at time : " << std::ctime(&end_timeL) << std::endl;
+  std::cout << "Finished popFirst for list - " << count << " elements, time : " << elapsedSecondsL.count() << "  - at time : " << std::ctime(&end_timeL) << std::endl;
 
 
   //vector
@@ -101,7 +101,7 @@ void popFirstTest(ListCollection<int> list, VectorCollection<int> vec, int count
 	std::time_t end_timeV = std::chrono::system_clock::to_time_t(end);
   std::chrono::duration<double> elapsedSecondsV = end - start;
 
-  std::cout << "Finished popFirst for vector - " << count << " elements, time : " << elapsedSecondsV.count()  << ",\n at time : " << std::ctime(&end_timeV) << std::endl;
+  std::cout << "Finished popFirst for vector - " << count << " elements, time : " << elapsedSecondsV.count()  << "  - at time : " << std::ctime(&end_timeV) << std::endl;
 }
 
 void popLastTest(ListCollection<int> list, VectorCollection<int> vec, int count)
@@ -117,7 +117,7 @@ void popLastTest(ListCollection<int> list, VectorCollection<int> vec, int count)
 	std::time_t end_timeL = std::chrono::system_clock::to_time_t(end);
   std::chrono::duration<double> elapsedSecondsL = end - start;
 
-  std::cout << "Finished popLast for list - " << count << " elements, time : " << elapsedSecondsL.count() << ",\n at time : " << std::ctime(&end_timeL) << std::endl;
+  std::cout << "Finished popLast for list - " << count << " elements, time : " << elapsedSecondsL.count() << "  - at time : " << std::ctime(&end_timeL) << std::endl;
 
 
   //vector
@@ -131,7 +131,7 @@ void popLastTest(ListCollection<int> list, VectorCollection<int> vec, int count)
 	std::time_t end_timeV = std::chrono::system_clock::to_time_t(end);
   std::chrono::duration<double> elapsedSecondsV = end - start;
 
-  std::cout << "Finished popLast for vector - " << count << " elements, time : " << elapsedSecondsV.count()  << ",\n at time : " << std::ctime(&end_timeV) << std::endl;
+  std::cout << "Finished popLast for vector - " << count << " elements, time : " << elapsedSecondsV.count()  << "  - at time : " << std::ctime(&end_timeV) << std::endl;
 }
 
 
@@ -144,7 +144,7 @@ void eraseTest(ListCollection <int> &l, VectorCollection <int> &v, int count)
   std::chrono::duration<double> elapsedSecondsL = end - start;
   std::time_t end_timeL = std::chrono::system_clock::to_time_t(end);
 
-  std::cout << "Finished ERASE for list - " << count << " elements, time : " << elapsedSecondsL.count() << ",\n at time : " << std::ctime(&end_timeL) << std::endl;
+  std::cout << "Finished ERASE for list - " << count << " elements, time : " << elapsedSecondsL.count() << "  - at time : " << std::ctime(&end_timeL) << std::endl;
 
   start = std::chrono::system_clock::now();
   v.erase(v.begin(), v.end());
@@ -153,7 +153,7 @@ void eraseTest(ListCollection <int> &l, VectorCollection <int> &v, int count)
   std::chrono::duration<double> elapsedSecondsV = end - start;
   std::time_t end_timeV = std::chrono::system_clock::to_time_t(end);
 
-    std::cout << "Finished ERASE for vector - " << count << " elements, time : " << elapsedSecondsV.count() << ",\n at time : " << std::ctime(&end_timeV) << std::endl;
+    std::cout << "Finished ERASE for vector - " << count << " elements, time : " << elapsedSecondsV.count() << "  - at time : " << std::ctime(&end_timeV) << std::endl;
 
 }
 
@@ -165,7 +165,7 @@ int main()
 
   for(int i : {100 , 1000, 10000})
   {
-    std::cout << "P- + - + - + - + - + - + - + - + - + " << i << " + - + - + - + - + - + - + - + - + -P\n";
+    std::cout << i <<" - + - + - + - + - + - + - + - + - + " << i << " + - + - + - + - + - + - + - + - + - "<< i <<"\n";
     prependTest(list, vec, i);
     popLastTest(list, vec, i);
 	  eraseTest(list, vec, i);
