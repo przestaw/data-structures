@@ -35,14 +35,15 @@ private:
   void resize()
   {
     Type * temp;
-    size = size + ALLOC_SIZE;
-    temp = new Type[size];
+    size_type new_size = size + ALLOC_SIZE;
+    temp = new Type[new_size];
     for(int i = 0; i < (int)size; i++)
     {
       temp[i] = vec_table[i];
     }
     delete[] vec_table;
     vec_table = temp;
+    size = new_size;
   }
 
 public:
