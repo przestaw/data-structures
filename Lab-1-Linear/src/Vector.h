@@ -188,7 +188,7 @@ public:
 
   void insert(const const_iterator& insertPosition, const Type& item)
   {
-    if(this->size < insertPosition.position)
+    if(this->size < insertPosition.getPosition())
     {
       throw std::logic_error("Vector: Can't insert outside vector");
     }
@@ -203,7 +203,7 @@ public:
         resize();
       }
 
-      int where = insertPosition.position;
+      int where = insertPosition.getPosition();
       int i = count;
       while(i > where)
       {
@@ -257,12 +257,12 @@ public:
 
   void erase(const const_iterator& possition)
   {
-    if(this->isEmpty() || possition.position >= count)
+    if(this->isEmpty() || possition.getPosition() >= count)
     {
       throw std::out_of_range("Vector: Can't erase element because of no element");
     }
 
-    int delete_position = possition.position;
+    int delete_position = possition.getPosition();
 
     for(int i = delete_position; i < (int)count; i++)
     {
@@ -279,13 +279,13 @@ public:
       return; //nothing to delete
     }
 
-    if(this->isEmpty())// || firstIncluded.position >= count || lastExcluded.position >= count)
+    if(this->isEmpty())
     {
       throw std::out_of_range("Vector: Can't erase elements - out of range");
     }
 
-    size_type begin_delete = firstIncluded.position;
-    size_type end_delete_inc = lastExcluded.position;
+    size_type begin_delete = firstIncluded.getPosition();
+    size_type end_delete_inc = lastExcluded.getPosition();
 
     if(begin_delete>=end_delete_inc)
     {
@@ -352,7 +352,7 @@ public:
   using difference_type = typename Vector::difference_type;
   using pointer = typename Vector::const_pointer;
   using reference = typename Vector::const_reference;
-//protected:
+protected:
   const Vector<Type>* vector;
   Type* current;
   size_type position;
@@ -365,21 +365,13 @@ public:
   ConstIterator(const Vector<Type>* vector_c, Type* current_c, size_type position_c):
       vector(vector_c), current(current_c), position(position_c)
   {}
-/*
-  ConstIterator(const ConstIterator &other)
-  {
-    this->current = other.current;
-    this->vector = other.vector;
-    this->position = other.position;
-  }
-*/
 
-/*
-  size_type getPosition const
+
+  size_type getPosition() const
   {
     return position;
   }
-*/
+
   reference operator*() const
   {
     if(position >= vector->getSize() || position < 0)
