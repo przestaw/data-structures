@@ -79,14 +79,6 @@ public:
     {
         this->append(other.vec_table[i]);
     }
-    /*
-    auto vec = other.begin();
-    while(vec != other.end())
-    {
-        this->append(*vec);
-        ++vec;
-    }
-     */
   }
 
   Vector(Vector&& other)//:
@@ -125,14 +117,6 @@ public:
         this->append(other.vec_table[i]);
     }
 
-/*
-    auto vec = other.begin();
-    while(vec != other.end())
-    {
-        this->append(*vec);
-        ++vec;
-    }
-*/
     return *this;
   }
 
@@ -202,27 +186,12 @@ public:
       {
         resize();
       }
-
-      int where = insertPosition.getPosition();
-      int i = count;
-      while(i > where)
+      for(size_type i = count; i > insertPosition.getPosition(); i--)
       {
           vec_table[i] = vec_table[i-1];
-          i--;
       }
-      vec_table[where] = item;
+      vec_table[insertPosition.getPosition()] = item;
       count++;
-      /*
-      if(size == count)
-      {
-        resize();
-      }
-      ++count;
-      for(ConstIterator it = end(); it != insertPosition; it--)
-      {
-        vec_table[it.position] = vec_table[it.position - 1];
-      }
-      */
     }
   }
 
@@ -301,13 +270,6 @@ public:
       begin_delete++;
       end_delete_inc++;
     }
-    /*
-    //TODO : Delete loop below
-    while (end_delete_inc > begin_delete) {
-        this->popLast();
-        end_delete_inc--;
-    }
-    */
     count = count - diff;
   }
 

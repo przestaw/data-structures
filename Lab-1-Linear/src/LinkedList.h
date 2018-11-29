@@ -45,9 +45,9 @@ private:
         }
     };
 
-
   Node *first;
   Node *last;
+
 public:
   LinkedList()
   {
