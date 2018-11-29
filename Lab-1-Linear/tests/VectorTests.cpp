@@ -936,7 +936,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(GivenNonEmptyCollection_WhenErasingRange_ThenSizeI
 // ConstIterator is tested via Iterator methods.
 // If Iterator methods are to be changed, then new ConstIterator tests are required.
 
-
 BOOST_AUTO_TEST_CASE_TEMPLATE(CollectionAfterThrowing_StillWorks,
                               T,
                               TestedTypes)
@@ -950,7 +949,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(CollectionAfterThrowing_StillWorks,
   BOOST_CHECK_THROW(collection.popFirst(),std::out_of_range);
   BOOST_CHECK_THROW(collection.popLast(),std::out_of_range);
   BOOST_CHECK_NO_THROW(collection.prepend(3));
-  BOOST_CHECK_NO_THROW(collection.append(4))
+  BOOST_CHECK_NO_THROW(collection.append(4));
   BOOST_CHECK_EQUAL(collection.popFirst(), 3);
   BOOST_CHECK_EQUAL(collection.popLast(), 4);
   BOOST_CHECK_THROW(collection.popFirst(),std::out_of_range);
@@ -973,7 +972,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(CollectionCreationByAdding_Works,
   thenCollectionContainsValues(collection, {6, 3, 4, 5, 7});
 
 }
-
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(CollectionGeting_ViaIteratorEnd_Works,
                               T,

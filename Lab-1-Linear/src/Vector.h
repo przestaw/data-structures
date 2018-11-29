@@ -264,7 +264,7 @@ public:
 
     int delete_position = possition.getPosition();
 
-    for(int i = delete_position; i < (int)count; i++)
+    for(int i = delete_position; i < (int)count - 1; i++)
     {
       vec_table[i] = vec_table[i+1];
     }
