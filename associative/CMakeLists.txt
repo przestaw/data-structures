@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(AISDI_Maps)
+project(Associative)
 
 include(CTest)
 enable_testing()

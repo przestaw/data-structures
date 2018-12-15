@@ -125,7 +125,7 @@ struct Fixture
 } // namespace
 
 template <typename K>
-using Map = aisdi::TreeMap<K, std::string>;
+using Map = associative::TreeMap<K, std::string>;
 
 using TestedKeyTypes = boost::mpl::list<std::int32_t, std::uint64_t, OperationCountingObject>;
 using std::begin;

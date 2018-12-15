@@ -8,10 +8,10 @@
 #include "LinkedList.h"
 
 template <typename T>
-using ListCollection = aisdi::LinkedList<T>;
+using ListCollection = linear::LinkedList<T>;
 
 template <typename T>
-using VectorCollection = aisdi::Vector<T>;
+using VectorCollection = linear::Vector<T>;
 
 void prependTest(ListCollection<int> &list, VectorCollection<int> &vec, int count)
 {

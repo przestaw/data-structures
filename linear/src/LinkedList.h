@@ -5,7 +5,7 @@
 #include <initializer_list>
 #include <stdexcept>
 
-namespace aisdi
+namespace linear
 {
 template <typename Type>
 class LinkedList
@@ -27,7 +27,7 @@ private:
     class Node
     {
     public:
-        Type data;
+        value_type data;
         Node *prev;
         Node *next;
 
@@ -37,7 +37,7 @@ private:
             prev = nullptr;
         }
 
-        Node(const Type &A):
+        Node(const value_type&A):
                 data(A)
         {
             next = nullptr;
@@ -211,7 +211,7 @@ public:
       insertPosition.getActual()->prev = newElement;
   }
 
-  Type popFirst()
+  value_type popFirst()
   {
     if(this->isEmpty())
     {
@@ -224,7 +224,7 @@ public:
     return temp;
   }
 
-  Type popLast()
+  value_type popLast()
   {
     if(this->isEmpty())
     {
@@ -315,6 +315,7 @@ public:
   using difference_type = typename LinkedList::difference_type;
   using pointer = typename LinkedList::const_pointer;
   using reference = typename LinkedList::const_reference;
+  using Node = typename LinkedList::Node;
 private:
   Node *actual;
 public:

@@ -1,2 +1,2 @@
-add_executable(aisdiLinear main.cpp Vector.h LinkedList.h)
-add_dependencies(aisdiLinear check)
+add_executable(linear main.cpp Vector.h LinkedList.h)
+add_dependencies(linear checkLinear)

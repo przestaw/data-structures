@@ -7,7 +7,7 @@
 
 #define ALLOC_SIZE 150
 
-namespace aisdi
+namespace linear
 {
 
 template <typename Type>
@@ -19,7 +19,7 @@ public:
   using value_type = Type;
   using pointer = Type*;
   using reference = Type&;
-  using const_pointer = const Type*;
+  using const_pointer = const pointer;
   using const_reference = const Type&;
 
   class ConstIterator;
@@ -312,11 +312,12 @@ public:
   using iterator_category = std::bidirectional_iterator_tag;
   using value_type = typename Vector::value_type;
   using difference_type = typename Vector::difference_type;
-  using pointer = typename Vector::const_pointer;
+  using pointer = typename Vector::pointer;
   using reference = typename Vector::const_reference;
+  using size_type = typename Vector::size_type;
 protected:
   const Vector<Type>* vector;
-  Type* current;
+  pointer current;
   size_type position;
 public:
 
@@ -324,7 +325,7 @@ public:
     vector(nullptr), current(nullptr), position(0)
   {}
 
-  ConstIterator(const Vector<Type>* vector_c, Type* current_c, size_type position_c):
+  ConstIterator(const Vector<Type>* vector_c, pointer current_c, size_type position_c):
       vector(vector_c), current(current_c), position(position_c)
   {}
 

@@ -125,7 +125,7 @@ struct Fixture
 } // namespace
 
 template <typename K>
-using Map = aisdi::HashMap<K, std::string>;
+using Map = associative::HashMap<K, std::string>;
 
 using TestedKeyTypes = boost::mpl::list<std::int32_t, std::uint64_t, OperationCountingObject>;
 

@@ -127,7 +127,7 @@ struct Fixture
 } // namespace
 
 template <typename T>
-using LinearCollection = aisdi::LinkedList<T>;
+using LinearCollection = linear::LinkedList<T>;
 
 using TestedTypes = boost::mpl::list<std::int32_t,
                                      std::uint64_t,
