@@ -314,7 +314,7 @@ private:
 
     void replace(Node* A, Node* B)
     {
-      //przepinany papa od A
+      //obtain parent from A and connect B
       if (A->papa == nullptr)
       {
         tree_root = B;
@@ -330,20 +330,19 @@ private:
 
       if (B != nullptr)
       {
-        //nowy papa dla B
+        //new parent for B
         B->papa = A->papa;
-        //nowy r_son dla B (jesli if jest spełniony to r_son od B powinien byc nullptr)
-        if(A->r_son != nullptr && A->r_son != B)
+
+        if(A->r_son != nullptr && A->r_son != B)// => B->r_son == null
         {
-          B->r_son = A->r_son;
+          B->r_son = A->r_son;//new r_son for B
         }
-        //nowy l_son dla B (jesli if jest spełniony to l_son od B powinien byc nullptr)
-        if(A->l_son != nullptr && A->l_son != B)
+        if(A->l_son != nullptr && A->l_son != B)// => B->l_son == null
         {
-          B->l_son = A->l_son;
+          B->l_son = A->l_son;//l_son for B
         }
       }
-      //odseparowanie A
+      //separating A - to ensure tree wont e affected in case of delete - see ~Node()
       A->papa = nullptr;
       A->l_son   = nullptr;
       A->r_son  = nullptr;
@@ -353,29 +352,28 @@ private:
     {
       if (node->l_son == nullptr)
       {
-        //w miejsce usuwanego wezla wstawiane jego prawe poddrzewo
+        //in place of deleted inserts r_son
         replace(node, node->r_son);
       }
       else if (node->r_son == nullptr)
       {
-        //w miejsce usuwanego wezla wstawiane jego lewe poddrzewo
+        //in place of deleted inserts l_son
         replace(node, node->l_son);
       }
       else
-      { //usuwany wezel ma 2 dzieci
+      { //has 2 sons
         auto tmp = node->r_son;
-        //wyszukiwanie kolejnego elementu wzgledem usuwanego
-        while (tmp->l_son != nullptr)
+        while (tmp->l_son != nullptr)//seeking next element
         {
           tmp = tmp->l_son;
         }
-        //w miejsce nastepnika wstawiany jego prawe poddrzewo
+        //r_son in place of next element
         replace(tmp, tmp->r_son);
-        //w miejsce usuwanego wezla wstawiany jego nastepnik
+        //next element in place of deleted
         replace(node, tmp);
       }
       count--;
-      delete node;
+      delete node;//delete
     }
 
     void insert(Node* node)
@@ -426,8 +424,79 @@ private:
             return;
           }
         }
-        //balance ??
+        //TODO:: balance ??                                //TODO
       }
+    }
+
+    void rotate_right_parent(Node* node)
+    {
+      Node *P, *R, *RL;
+      P = node->papa;
+      R = node->r_son;
+      RL = node->r_son->l_son;
+
+      if (P != nullptr)
+      {
+        if (P->r_son == node)
+        {
+          P->r_son = R;
+        }
+        else
+        {
+          P->l_son = R;
+        }
+      }
+      else
+      {
+        tree_root = R;
+      }
+      R->papa = P;
+
+      R->l_son = node;
+      node->papa = R;
+
+      node->r_son = RL;
+      if(RL != nullptr)
+      {
+        RL->papa = node;
+      }
+
+      //updateHeight(node);
+    }
+    void rotate_left_parent(Node* node)
+    {
+      Node *P, *L, *LR;
+      P = node->papa;
+      L = node->l_son;
+      LR = node->l_son->r_son;
+
+      if (P != nullptr)
+      {
+        if (P->r_son == node)
+        {
+          P->r_son = L;
+        }
+        else
+        {
+          P->l_son = L;
+        }
+      }
+      else
+      {
+        tree_root = L;
+      }
+      L->papa = P;
+
+      L->r_son = node;
+      node->papa = L;
+
+      node->l_son = LR;
+      if(LR != nullptr)
+      {
+        LR->papa = node;
+      }
+
+      //updateHeight(node);
     }
 };
 

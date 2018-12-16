@@ -8,7 +8,9 @@
 #include <list>
 #include <algorithm>
 
-#define DEFAULT_HASH 2601
+#include <iostream>
+
+#define DEFAULT_HASH 250
 
 namespace associative
 {
@@ -23,6 +25,8 @@ public:
   using size_type = std::size_t;
   using reference = value_type&;
   using const_reference = const value_type&;
+
+  using list = std::list<value_type>;
   using list_iterator = typename std::list<value_type>::iterator;
 
   class ConstIterator;
@@ -30,43 +34,80 @@ public:
   using iterator = Iterator;
   using const_iterator = ConstIterator;
 private:
-    std::list<value_type> **table;
-    key_type hash;
+    list *table;
+    size_type hash;
     size_type count;
 public:
   HashMap(key_type size = DEFAULT_HASH) :
       hash(size), count(0)
   {
-    table = new std::list<value_type>*[hash];
+    table = new list[hash];
   }
 
   HashMap(std::initializer_list<value_type> list) :
       HashMap(DEFAULT_HASH)
   {
-    (void)list; // disables "unused argument" warning, can be removed when method is implemented.
-    throw std::runtime_error("TODO");
+    for(auto it = list.begin(); it != list.end(); ++it)
+    {
+      insert(*it);
+    }
   }
 
   HashMap(const HashMap& other)
   {
-    (void)other;
-    throw std::runtime_error("TODO");
+    this->hash = other.hash;
+    this->table = new list[this->hash];
+    this->count = 0;
+
+    for(auto it = other.begin(); it != other.end(); ++it)
+    {
+      insert(*it);
+    }
   }
 
   HashMap(HashMap&& other)
   {
     hash = DEFAULT_HASH;
     table = nullptr;
+    count = 0;
 
     std::swap(this->hash, other.hash);
     std::swap(this->count, other.count);
     std::swap(this->table, other.table);
   }
 
+  ~HashMap()
+  {
+    if(table != nullptr)
+    {
+      delete[] table;
+    }
+  }
+
   HashMap& operator=(const HashMap& other)
   {
-    (void)other;
-    throw std::runtime_error("TODO");
+    if(this == &other)
+    {
+      return *this;
+    }
+    else
+    {
+      hash = other.hash;
+      count = 0;
+
+      if(table != nullptr)
+      {
+        delete[] table;
+      }
+      table = new list[hash];
+
+      for (auto it = other.begin(); it != other.end(); ++it)
+      {
+        insert(*it);
+      }
+
+      return *this;
+    }
   }
 
   HashMap& operator=(HashMap&& other)
@@ -77,7 +118,10 @@ public:
     }
     else
     {
-      delete this->table;
+      if(table != nullptr)
+      {
+        delete[] table;
+      }
       this->table = nullptr;
       this->count = 0;
 
@@ -96,78 +140,103 @@ public:
 
   mapped_type& operator[](const key_type& key)
   {
-    (void)key;
-    throw std::runtime_error("TODO");
+    auto it = find(key); //end()?
+    if(it == end())
+    {
+      //typically insert
+      key_type index = hash_value(key);
+      table[index].push_back(value_type(key, {}));
+      count++;
+      return table[index].back().second;
+    }
+    else
+    {
+      return it->second;
+    }
   }
 
   const mapped_type& valueOf(const key_type& key) const
   {
-    (void)key;
-    throw std::runtime_error("TODO");
+    auto it = find(key); //cend()?
+    return it->second;
   }
 
   mapped_type& valueOf(const key_type& key)
   {
-    (void)key;
-    throw std::runtime_error("TODO");
+    auto it = find(key); //end()?
+    return it->second;
   }
 
   const_iterator find(const key_type& key) const
   {
-    key_type index = hash_value(key);
-    if(table[index] == nullptr || table[index]->size() == 0)
+    if(count == 0)
     {
-      return end();
+      return cend();
     }
     else
     {
-      list_iterator it1 = table[index]->begin();
-      list_iterator it2 = table[index]->end();
-      for(it1; it1 != it2; it1++)
+      key_type index = hash_value(key);
+      if(table[index].size() == 0)
       {
-        if((*it1).first == key)
-        {
-          return const_iterator(index, it1, this);
-        }
+        return cend();
       }
-      //else
-      return cend();
+      else
+      {
+        for(auto it = table[index].begin(); it != table[index].end(); it++)
+        {
+          if(it->first == key)
+          {
+            return const_iterator(index, it, this);
+          }
+        }
+        return cend();
+      }
     }
   }
 
   iterator find(const key_type& key)
   {
-    key_type index = hash_value(key);
-    if(table[index] == nullptr || table[index]->size() == 0)
+    if(count == 0)
     {
       return end();
     }
     else
     {
-      list_iterator it1 = table[index]->begin();
-      list_iterator it2 = table[index]->end();
-      for(; it1 != it2; it1++)
+      key_type index = hash_value(key);
+      if(table[index].size() == 0)
       {
-        if((*it1).first == key)
-        {
-          return iterator(index, it1, this);
-        }
+        return end();
       }
-      //else
-      return end();
+      else
+      {
+        for(auto it = table[index].begin(); it != table[index].end(); it++)
+        {
+          if(it->first == key)
+          {
+            return iterator(index, it, this);
+          }
+        }
+        return end();
+      }
     }
   }
 
   void remove(const key_type& key)
   {
-    (void)key;
-    throw std::runtime_error("TODO");
+    remove(find(key));
   }
 
   void remove(const const_iterator& it)
   {
-    (void)it;
-    throw std::runtime_error("TODO");
+    if(it != cend() && count !=0)
+    {
+      table[hash_value(it->first)].erase(it.get_list_iterator());
+      count--;
+    }
+    else
+    {
+      throw std::out_of_range("HashMap : can't remove because of no element / end remove");
+    }
   }
 
   size_type getSize() const
@@ -177,8 +246,23 @@ public:
 
   bool operator==(const HashMap& other) const
   {
-    (void)other;
-    throw std::runtime_error("TODO");
+    if(this->count != other.count)
+    {
+      return false;
+    }
+    else
+    {
+      for(auto it = begin(); it != end(); it++)
+      {
+        auto temp = other.find(it->first);
+        if(temp == other.end() || temp->second != it->second)
+        {
+          return false;
+        }
+      }
+
+      return true;
+    }
   }
 
   bool operator!=(const HashMap& other) const
@@ -188,22 +272,22 @@ public:
 
   iterator begin()
   {
-    return iterator(find_first());
+    return find_first();
   }
 
   iterator end()
   {
-    return iterator(hash, list_iterator(), this);
+    return iterator(hash-1, table[hash-1].end(), this);
   }
 
   const_iterator cbegin() const
   {
-    return find_first();
+    return c_find_first();
   }
 
   const_iterator cend() const
   {
-    return const_iterator(hash, list_iterator(),this);
+    return const_iterator(hash-1, table[hash-1].end(),this);
   }
 
   const_iterator begin() const
@@ -218,37 +302,33 @@ public:
 
 private:
 
-  key_type hash_value(key_type key)
+  key_type hash_value(key_type key) const
   {
     //return std::hash<key_type>()(key) % this->hash;
-    return key % this->hash;
+    return key % hash;
   }
 
   void insert(value_type ins_val)
   {
-    key_type key = hash_value(ins_val.first);
-    if(table[key] == nullptr)
-    {
-      table[key] = new std::list<value_type >;
-    }
-
-    table[key]->push_back(ins_val);
+    key_type index = hash_value(ins_val.first);
+    table[index].push_back(ins_val);
     count++;
   }
 
   iterator find(value_type find_val)
   {
     key_type index = hash_value(find_val.first);
-    if(table[index] == nullptr || table[index]->size() == 0)
+    if(table[index].empty())
     {
       return end();
     }
     else
     {
-      list_iterator it;
-      it = std::find(table[index]->begin(),table[index]->end(), find_val);
 
-      if(it != table[index]->end())
+      list_iterator it;
+      it = std::find(table[index].begin(),table[index].end(), find_val);
+
+      if(it != table[index].end())
       {
         return it;
       }
@@ -259,11 +339,30 @@ private:
     }
   }
 
-  const_iterator find_first()
+  const_iterator c_find_first() const
   {
+    for(uint i = 0; i < hash; i++)//why uint?
+    {
+      if(table[i].size() > 0)
+      {
+        return const_iterator(i, table[i].begin(), this);
+      }
+    }
 
+    return cend();
   }
 
+  iterator find_first()
+  {
+    for(uint i = 0; i < hash; i++)//why uint?
+    {
+      if(!table[i].empty())
+      {
+        return iterator(i, table[i].begin(), this);
+      }
+    }
+    return end();
+  }
 };
 
 template <typename KeyType, typename ValueType>
@@ -275,55 +374,61 @@ public:
   using value_type = typename HashMap::value_type;
   using pointer = const typename HashMap::value_type*;
   using key_type = typename HashMap::key_type;
-  using list_iterator = typename std::list<value_type>::iterator;
+  using list_iterator = typename HashMap::list_iterator;
+  using list = typename HashMap::list;
+  using size_type = typename HashMap::size_type;
 private:
-  HashMap *my_map;
-  key_type current;
+  const HashMap *my_map;
+  size_type current;
   list_iterator cur_list_iter;
 public:
   explicit ConstIterator()
   {}
 
-  ConstIterator(key_type current_c, list_iterator cur_list_iter_c,HashMap *mymap_c = nullptr) :
-     my_map(mymap_c), current(current_c), list_iterator(cur_list_iter_c)
+  ConstIterator(const key_type current_c,const list_iterator cur_list_iter_c, const HashMap *mymap_c = nullptr) :
+     my_map(mymap_c), current(current_c), cur_list_iter(cur_list_iter_c)
   {}
 
   ConstIterator(const ConstIterator& other) :
-    my_map(other.my_map), current(other.current), list_iterator(cur_list_iter)
+     my_map(other.my_map), current(other.current), cur_list_iter(other.cur_list_iter)
   {}
 
   ConstIterator& operator++()
   {
-    if(current == my_map->hash)
+    if( *this == my_map->end())
     {
       throw std::out_of_range("HashMap::ConstIterator : can't increment end()");
     }
+    else if (cur_list_iter != --(my_map->table[current].end()))
+    {
+      cur_list_iter++;
+      return *this;
+    }
     else
     {
-      if(cur_list_iter == my_map->table[current].end())
-      {
-        do{
-          current++;
-          if(my_map->table[current] != nullptr)
-          {
-            break;
-          }
-        }while(current <= my_map->hash);
-        if(current == my_map->hash)
+      /*
+      do{
+        current++;
+        if (!my_map->table[current].empty())
         {
-          return my_map->end();
+          break;
         }
-        else
+      }while (current < my_map->hash);
+
+      cur_list_iter = my_map->table[current].begin();
+       */
+      for(u_int i = current + 1; i < my_map->hash; ++i)
+      {
+        if(!my_map->table[i].empty())
         {
+          current = i;
           cur_list_iter = my_map->table[current].begin();
           return *this;
         }
       }
-      else
-      {
-        cur_list_iter++;
-        return *this;
-      }
+      current = my_map->hash -1;
+      cur_list_iter = my_map->table[current].end();
+      return *this;
     }
   }
 
@@ -340,56 +445,38 @@ public:
     {
       throw std::out_of_range("HashMap::ConstIterator : can't increment begin()");
     }
-    else if(current == my_map->hash)
+    else if(cur_list_iter != my_map->table[current].begin())
     {
-      key_type temp = current;
-      do{
-        temp--;
-        if(my_map->table[temp] != nullptr)
-        {
-          break;
-        }
-      }while(temp >= 0);
-      if(temp == 0 && my_map->table[temp] == nullptr) //temp = 0 && no element in
-      {
-        return my_map->begin();
-      }
-      else
-      {
-        current = temp;
-        cur_list_iter = my_map->table[current].end();
-        cur_list_iter++;
-        return *this;
-      }
+      cur_list_iter--;
     }
     else
     {
-      if(cur_list_iter == my_map->table[current].begin())
-      {
-        do{
-          current--;
-          if(my_map->table[current] != nullptr)
-          {
-            break;
-          }
-        }while(current >= 0);
-        if(current == 0 && my_map->table[0] == nullptr)
+      /*
+      do{
+        current--;
+        if (!my_map->table[current].empty())
         {
-          return my_map->begin();
+          break;
         }
-        else
+      }while (current >= 0);
+
+      cur_list_iter = --(my_map->table[current].end());
+      */
+      for(u_int i = current - 1; i > 0; --i)
+      {
+        if(!(my_map->table[i].empty()))
         {
-          cur_list_iter = my_map->table[current].end();
-          cur_list_iter--;
+          current = i;
+          cur_list_iter = (my_map->table[current].end());
+          --cur_list_iter;
           return *this;
         }
       }
-      else
-      {
-        cur_list_iter--;
-        return *this;
-      }
+      current = 0;
+      cur_list_iter = my_map->table[current].begin();//invalid?
+      return *this;
     }
+    return *this;
   }
 
   ConstIterator operator--(int)
@@ -401,11 +488,14 @@ public:
 
   reference operator*() const
   {
-    if(my_map == nullptr || current == my_map->hash)
+    if(*this == my_map->end())
     {
       throw std::out_of_range("HashMap::ConstIterator : can't dereference end()");
     }
-    else
+    else if(cur_list_iter == my_map->table[current].end())
+    {
+      throw std::out_of_range("HashMap::ConstIterator : can't dereference because of wrong");
+    } else
     {
       return *cur_list_iter;
     }
@@ -425,6 +515,11 @@ public:
   {
     return !(*this == other);
   }
+
+  list_iterator get_list_iterator() const
+  {
+    return cur_list_iter;
+  }
 };
 
 template <typename KeyType, typename ValueType>
@@ -437,7 +532,7 @@ public:
   explicit Iterator()
   {}
 
-  Iterator(key_type current_c, list_iterator cur_list_iter_c,HashMap *mymap_c = nullptr) :
+  Iterator(key_type current_c, list_iterator cur_list_iter_c, const HashMap *mymap_c = nullptr) :
      ConstIterator(current_c, cur_list_iter_c, mymap_c)
   {}
 
