@@ -1,5 +1,5 @@
-#ifndef AISDI_MAPS_HASHMAP_H
-#define AISDI_MAPS_HASHMAP_H
+#ifndef ASSOCIATIVE_HASHMAP
+#define ASSOCIATIVE_HASHMAP
 
 #include <cstddef>
 #include <initializer_list>
@@ -579,4 +579,4 @@ public:
 
 }
 
-#endif /* AISDI_MAPS_HASHMAP_H */
+#endif /* ASSOCIATIVE_HASHMAP */

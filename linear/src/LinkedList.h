@@ -1,5 +1,5 @@
-#ifndef AISDI_LINEAR_LINKEDLIST_H
-#define AISDI_LINEAR_LINKEDLIST_H
+#ifndef LINEAR_LINKEDLIST_H
+#define LINEAR_LINKEDLIST_H
 
 #include <cstddef>
 #include <initializer_list>
@@ -517,4 +517,4 @@ public:
 
 }
 
-#endif // AISDI_LINEAR_LINKEDLIST_H
+#endif // LINEAR_LINKEDLIST_H
