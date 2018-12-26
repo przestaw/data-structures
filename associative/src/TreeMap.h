@@ -559,6 +559,13 @@ private:
 
     void remove(Node* node)
     {
+      Node * temp = node->papa;
+      bool left = false;
+      if(node->papa != nullptr)//if not its a tree root and it does not matter
+      {
+        left = (node->papa->l_son == node);
+      }
+
       if (node->l_son == nullptr)
       {
         //in place of deleted inserts r_son
@@ -571,23 +578,24 @@ private:
       }
       else
       { //has 2 sons
-        auto tmp = node->r_son;
-        while (tmp->l_son != nullptr)//seeking next element
+        Node * next = node->r_son;
+        while (next->l_son != nullptr)//seeking next element
         {
-          tmp = tmp->l_son;
+          next = next->l_son;
         }
+        temp = next->papa;
         //r_son in place of next element
-        replace(tmp, tmp->r_son);
+        replace(next, next->r_son);
         //next element in place of deleted
-        replace(node, tmp);
-      }
-      count--;
+        replace(node, next);
 
-      /// ! B A L A N C E !
+      }
+      balance_remove(temp, left);
+      count--;
       delete node;//delete
     }
 
-    void balance_remove(Node *node)
+    void balance_remove(Node* node, bool left)
     {
       if(node == nullptr)
       {
@@ -599,45 +607,43 @@ private:
       }
       else
       {
-        if(node->papa->l_son == node)
+        bool new_left = false;
+        if(node->papa != nullptr)//if not its a tree root and it does not matter
         {
-          node->papa->balance++;
-          switch (node->papa->balance)
-          {
-            case 2: //balance++ = 2 -> bal
-
-              break;
-            case 1: //balance++ = 1 ->heavier subtree
-
-              break;
-            case 0: //balance++ = 0 ->finish
-
-              break;
-            default:
-              throw std::runtime_error("Tree: Unknown error in balance delete -> invalid balance");
-          }
+          new_left = (node->papa->l_son == node);
         }
-        else if(node->papa->r_son == node)
+
+        if(left)
         {
-          node->papa->balance--;
-          switch (node->papa->balance)
+          node->balance--;
+          switch(node->balance)
           {
-            case 0: //balance-- = 0 ->finish
-
+            case 0:
+              balance_remove(node->papa, new_left);
               break;
-            case -1: //balance-- = -1 ->heavier subtree
-
+            case -1:
+              return;
+            case -2:
+              //bal
+              balance_remove(node->papa, new_left);
               break;
-            case -2: //balance-- = -2 ->bal
-
-              break;
-            default:
-              throw std::runtime_error("Tree: Unknown error in balance delete -> invalid balance");
           }
         }
         else
         {
-          throw std::runtime_error("Tree: Unknown error in balance delete -> node is nor l_son or r_son of papa");
+          node->balance++;
+          switch(node->balance)
+          {
+            case 0:
+              balance_remove(node->papa, new_left);
+              break;
+            case 1:
+              return;
+            case 2:
+              //bal
+              balance_remove(node->papa, new_left);
+              break;
+          }
         }
       }
     }
