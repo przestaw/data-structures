@@ -279,6 +279,7 @@ public:
   {
     return cend();
   }
+
 private:
 
     Node* get_most_left() const
@@ -312,6 +313,60 @@ private:
       return node;
     }
 
+
+    void insert(Node* node)
+    {
+      if(tree_root == nullptr)
+      {
+        count++;
+        tree_root = node;
+      }
+      else
+      {
+        Node * temp = tree_root;
+
+        while(temp != nullptr)
+        {
+          if(node->node_value.first < temp->node_value.first)
+          {
+            if(temp->l_son == nullptr)
+            {
+              temp->l_son = node;
+              node->papa = temp;
+              balance_insert(node);
+              count++;
+              break;
+            }
+            else
+            {
+              temp = temp->l_son;
+            }
+          }
+          else if(node->node_value.first > temp->node_value.first)
+          {
+
+            if(temp->r_son == nullptr)
+            {
+              temp->r_son = node;
+              node->papa = temp;
+              balance_insert(node);
+              count++;
+              break;
+            }
+            else
+            {
+              temp = temp->r_son;
+            }
+          }
+          else //already in tree
+          {
+            delete node;
+            return;
+          }
+        }
+      }
+    }
+
     void replace(Node* A, Node* B)
     {
       //obtain parent from A and connect B
@@ -342,93 +397,13 @@ private:
           B->l_son = A->l_son;//l_son for B
         }
       }
-      //separating A - to ensure tree wont e affected in case of delete - see ~Node()
+      //separating A - to ensure tree wont be affected in case of delete - see ~Node()
       A->papa = nullptr;
       A->l_son   = nullptr;
       A->r_son  = nullptr;
     }
 
-    void remove(Node* node)
-    {
-      if (node->l_son == nullptr)
-      {
-        //in place of deleted inserts r_son
-        replace(node, node->r_son);
-      }
-      else if (node->r_son == nullptr)
-      {
-        //in place of deleted inserts l_son
-        replace(node, node->l_son);
-      }
-      else
-      { //has 2 sons
-        auto tmp = node->r_son;
-        while (tmp->l_son != nullptr)//seeking next element
-        {
-          tmp = tmp->l_son;
-        }
-        //r_son in place of next element
-        replace(tmp, tmp->r_son);
-        //next element in place of deleted
-        replace(node, tmp);
-      }
-      count--;
-      delete node;//delete
-    }
-
-    void insert(Node* node)
-    {
-      if(tree_root == nullptr)
-      {
-        count++;
-        tree_root = node;
-      }
-      else
-      {
-        Node * temp = tree_root;
-
-        while(temp != nullptr)
-        {
-          if(node->node_value.first < temp->node_value.first)
-          {
-            if(temp->l_son == nullptr)
-            {
-              temp->l_son = node;
-              node->papa = temp;
-              count++;
-              break;
-            }
-            else
-            {
-              temp = temp->l_son;
-            }
-          }
-          else if(node->node_value.first > temp->node_value.first)
-          {
-
-            if(temp->r_son == nullptr)
-            {
-              temp->r_son = node;
-              node->papa = temp;
-              count++;
-              break;
-            }
-            else
-            {
-              temp = temp->r_son;
-            }
-          }
-          else //already in tree
-          {
-            delete node;
-            return;
-          }
-        }
-        //TODO:: balance ??                                //TODO
-      }
-    }
-
-    void rotate_right_parent(Node* node)
+    void single_left(Node* node)
     {
       Node *P, *R, *RL;
       P = node->papa;
@@ -460,10 +435,8 @@ private:
       {
         RL->papa = node;
       }
-
-      //updateHeight(node);
     }
-    void rotate_left_parent(Node* node)
+    void single_right(Node* node)
     {
       Node *P, *L, *LR;
       P = node->papa;
@@ -495,9 +468,255 @@ private:
       {
         LR->papa = node;
       }
-
-      //updateHeight(node);
     }
+
+    void double_left_right(Node *node)
+    {
+      single_left(node->l_son);
+      single_right(node);
+    }
+
+    void double_right_left(Node *node)
+    {
+      single_right(node->r_son);
+      single_left(node);
+    }
+
+    void balance_insert(Node *node)
+    {
+      if(node == nullptr)
+      {
+        return;
+      }
+      else if (node->papa == nullptr)
+      {
+        return;
+      }
+      else
+      {
+        if(node->papa->l_son == node)
+        {
+            node->papa->balance++;
+            switch (node->papa->balance)
+            {
+              case 2: //balance++ = 2 -> bal
+                node->papa->balance = 0;
+                if(node->balance == -1)
+                {
+                  node->balance = 0;
+                  double_left_right(node->papa);
+                  //double_right_left(node->papa);
+                }
+                else // 1
+                {
+                  node->balance = 0;
+                  single_right(node->papa);
+                }
+                break;
+              case 1: //balance++ = 1 ->heavier subtree
+                balance_insert(node->papa);
+                break;
+              case 0: //balance++ = 0 ->finish
+                return;//no need to break
+              default:
+                throw std::runtime_error("Tree: Unknown error in balance insert -> invalid balance");
+            }
+        }
+        else if(node->papa->r_son == node)
+        {
+            node->papa->balance--;
+            switch (node->papa->balance)
+            {
+              case 0: //balance-- = 0 ->finish
+                return;//no need to break
+              case -1: //balance-- = -1 ->heavier subtree
+                balance_insert(node->papa);
+                break;
+              case -2: //balance-- = -2 ->bal
+                node->papa->balance = 0;//after bal
+                if(node->balance == 1)
+                {
+                  node->balance = 0;
+                  double_right_left(node->papa);
+                  //double_left_right(node->papa);
+                }
+                else // -1
+                {
+                  node->balance = 0;
+                  single_left(node->papa);
+                }
+                break;
+              default:
+                throw std::runtime_error("Tree: Unknown error in balance insert -> invalid balance");
+            }
+        }
+        else
+        {
+          throw std::runtime_error("Tree: Unknown error in balance insert -> node is nor l_son or r_son of papa");
+        }
+      }
+    }
+
+    void remove(Node* node)
+    {
+      if (node->l_son == nullptr)
+      {
+        //in place of deleted inserts r_son
+        replace(node, node->r_son);
+      }
+      else if (node->r_son == nullptr)
+      {
+        //in place of deleted inserts l_son
+        replace(node, node->l_son);
+      }
+      else
+      { //has 2 sons
+        auto tmp = node->r_son;
+        while (tmp->l_son != nullptr)//seeking next element
+        {
+          tmp = tmp->l_son;
+        }
+        //r_son in place of next element
+        replace(tmp, tmp->r_son);
+        //next element in place of deleted
+        replace(node, tmp);
+      }
+      count--;
+
+      /// ! B A L A N C E !
+      delete node;//delete
+    }
+
+    void balance_remove(Node *node)
+    {
+      if(node == nullptr)
+      {
+        return;
+      }
+      else if (node->papa == nullptr)
+      {
+        return;
+      }
+      else
+      {
+        if(node->papa->l_son == node)
+        {
+          node->papa->balance++;
+          switch (node->papa->balance)
+          {
+            case 2: //balance++ = 2 -> bal
+
+              break;
+            case 1: //balance++ = 1 ->heavier subtree
+
+              break;
+            case 0: //balance++ = 0 ->finish
+
+              break;
+            default:
+              throw std::runtime_error("Tree: Unknown error in balance delete -> invalid balance");
+          }
+        }
+        else if(node->papa->r_son == node)
+        {
+          node->papa->balance--;
+          switch (node->papa->balance)
+          {
+            case 0: //balance-- = 0 ->finish
+
+              break;
+            case -1: //balance-- = -1 ->heavier subtree
+
+              break;
+            case -2: //balance-- = -2 ->bal
+
+              break;
+            default:
+              throw std::runtime_error("Tree: Unknown error in balance delete -> invalid balance");
+          }
+        }
+        else
+        {
+          throw std::runtime_error("Tree: Unknown error in balance delete -> node is nor l_son or r_son of papa");
+        }
+      }
+    }
+
+public:
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    void print_tree()
+    {
+      print_node(tree_root);
+      std::cout << std::endl;
+      if(tree_root != nullptr)
+      {
+        print_node(tree_root->l_son);
+        std::cout << " -|- ";
+        print_node(tree_root->r_son);
+        std::cout << std::endl;
+        if(tree_root->l_son != nullptr)
+        {
+          print_node(tree_root->l_son->l_son);
+          std::cout << " -|- ";
+          print_node(tree_root->l_son->r_son);
+          std::cout << " -|- ";
+        }
+        if(tree_root->r_son != nullptr)
+        {
+          print_node(tree_root->r_son->l_son);
+          std::cout << " -|- ";
+          print_node(tree_root->r_son->r_son);
+        }
+        std::cout << std::endl;
+        if(tree_root->l_son != nullptr)
+        {
+          if(tree_root->l_son->l_son != nullptr)
+          {
+            print_node(tree_root->l_son->l_son->l_son);
+            std::cout << " -|- ";
+            print_node(tree_root->l_son->l_son->r_son);
+            std::cout << " -|- ";
+          }
+          if(tree_root->l_son->r_son != nullptr)
+          {
+            print_node(tree_root->l_son->r_son->l_son);
+            std::cout << " -|- ";
+            print_node(tree_root->l_son->r_son->r_son);
+            std::cout << " -|- ";
+          }
+        }
+        if(tree_root->r_son != nullptr)
+        {
+          if(tree_root->r_son->l_son != nullptr)
+          {
+            print_node(tree_root->r_son->l_son->l_son);
+            std::cout << " -|- ";
+            print_node(tree_root->r_son->l_son->r_son);
+            std::cout << " -|- ";
+          }
+          if(tree_root->r_son->r_son != nullptr)
+          {
+            print_node(tree_root->r_son->r_son->l_son);
+            std::cout << " -|- ";
+            print_node(tree_root->r_son->r_son->r_son);
+            std::cout << " -|- ";
+          }
+        }
+        std::cout << std::endl;
+      }
+    }
+
+    void print_node(Node * node)
+    {
+      if(node != nullptr)
+      {
+        std::cout << node->node_value.first;
+      }else
+      {
+        std::cout << " X-X ";
+      }
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 };
 
 template <typename KeyType, typename ValueType>
@@ -632,14 +851,7 @@ public:
 
   bool operator==(const ConstIterator& other) const
   {
-    if(actual == other.actual)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (actual == other.actual);
   }
 
   bool operator!=(const ConstIterator& other) const
