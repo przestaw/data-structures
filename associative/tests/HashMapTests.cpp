@@ -8,6 +8,7 @@
 
 #include <boost/mpl/list.hpp>
 
+
 namespace
 {
 
@@ -123,6 +124,17 @@ struct Fixture
 };
 
 } // namespace
+
+
+namespace std {
+    template <> struct hash<OperationCountingObject>
+    {
+        size_t operator()(const OperationCountingObject & x) const
+        {
+          return hash<int>()((int)x);
+        }
+    };
+}
 
 template <typename K>
 using Map = associative::HashMap<K, std::string>;

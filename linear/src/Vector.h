@@ -1,5 +1,5 @@
-#ifndef AISDI_LINEAR_VECTOR_H
-#define AISDI_LINEAR_VECTOR_H
+#ifndef LINEAR_VECTOR_H
+#define LINEAR_VECTOR_H
 
 #include <cstddef>
 #include <initializer_list>
@@ -507,4 +507,4 @@ public:
 
 }
 
-#endif // AISDI_LINEAR_VECTOR_H
+#endif // LINEAR_VECTOR_H

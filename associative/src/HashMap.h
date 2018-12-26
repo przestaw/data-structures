@@ -1,16 +1,15 @@
-#ifndef AISDI_MAPS_HASHMAP_H
-#define AISDI_MAPS_HASHMAP_H
+#ifndef ASSOCIATIVE_HASHMAP
+#define ASSOCIATIVE_HASHMAP
 
 #include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
 #include <utility>
-#include <list>
 #include <algorithm>
 
-#include <iostream>
-
-#define DEFAULT_HASH 250
+#include <list>
+#define DEFAULT_HASH 25000
+#define COLLECTION std::list<value_type>
 
 namespace associative
 {
@@ -26,22 +25,22 @@ public:
   using reference = value_type&;
   using const_reference = const value_type&;
 
-  using list = std::list<value_type>;
-  using list_iterator = typename std::list<value_type>::iterator;
+  using collection = COLLECTION;
+  using collection_iterator = typename collection::iterator;
 
   class ConstIterator;
   class Iterator;
   using iterator = Iterator;
   using const_iterator = ConstIterator;
 private:
-    list *table;
+    collection *table;
     size_type hash;
     size_type count;
 public:
   HashMap(key_type size = DEFAULT_HASH) :
       hash(size), count(0)
   {
-    table = new list[hash];
+    table = new collection[hash];
   }
 
   HashMap(std::initializer_list<value_type> list) :
@@ -56,7 +55,7 @@ public:
   HashMap(const HashMap& other)
   {
     this->hash = other.hash;
-    this->table = new list[this->hash];
+    this->table = new collection[this->hash];
     this->count = 0;
 
     for(auto it = other.begin(); it != other.end(); ++it)
@@ -99,7 +98,7 @@ public:
       {
         delete[] table;
       }
-      table = new list[hash];
+      table = new collection[hash];
 
       for (auto it = other.begin(); it != other.end(); ++it)
       {
@@ -230,7 +229,7 @@ public:
   {
     if(it != cend() && count !=0)
     {
-      table[hash_value(it->first)].erase(it.get_list_iterator());
+      table[hash_value(it->first)].erase(it.get_sub_iterator());
       count--;
     }
     else
@@ -302,10 +301,10 @@ public:
 
 private:
 
-  key_type hash_value(key_type key) const
+
+  size_type hash_value(key_type key) const
   {
-    //return std::hash<key_type>()(key) % this->hash;
-    return key % hash;
+    return std::hash<key_type>()(key) % this->hash;
   }
 
   void insert(value_type ins_val)
@@ -325,7 +324,7 @@ private:
     else
     {
 
-      list_iterator it;
+      collection_iterator it;
       it = std::find(table[index].begin(),table[index].end(), find_val);
 
       if(it != table[index].end())
@@ -374,23 +373,23 @@ public:
   using value_type = typename HashMap::value_type;
   using pointer = const typename HashMap::value_type*;
   using key_type = typename HashMap::key_type;
-  using list_iterator = typename HashMap::list_iterator;
-  using list = typename HashMap::list;
+  using collection_iterator = typename HashMap::collection_iterator;
+  using collection = typename HashMap::collection;
   using size_type = typename HashMap::size_type;
 private:
   const HashMap *my_map;
   size_type current;
-  list_iterator cur_list_iter;
+  collection_iterator cur_sub_iterator;
 public:
   explicit ConstIterator()
   {}
 
-  ConstIterator(const key_type current_c,const list_iterator cur_list_iter_c, const HashMap *mymap_c = nullptr) :
-     my_map(mymap_c), current(current_c), cur_list_iter(cur_list_iter_c)
+  ConstIterator(const key_type current_c,const collection_iterator cur_sub_iterator_c, const HashMap *mymap_c = nullptr) :
+     my_map(mymap_c), current(current_c), cur_sub_iterator(cur_sub_iterator_c)
   {}
 
   ConstIterator(const ConstIterator& other) :
-     my_map(other.my_map), current(other.current), cur_list_iter(other.cur_list_iter)
+     my_map(other.my_map), current(other.current), cur_sub_iterator(other.cur_sub_iterator)
   {}
 
   ConstIterator& operator++()
@@ -399,9 +398,9 @@ public:
     {
       throw std::out_of_range("HashMap::ConstIterator : can't increment end()");
     }
-    else if (cur_list_iter != --(my_map->table[current].end()))
+    else if (cur_sub_iterator != --(my_map->table[current].end()))
     {
-      cur_list_iter++;
+      cur_sub_iterator++;
       return *this;
     }
     else
@@ -415,19 +414,19 @@ public:
         }
       }while (current < my_map->hash);
 
-      cur_list_iter = my_map->table[current].begin();
+      cur_sub_iterator = my_map->table[current].begin();
        */
       for(u_int i = current + 1; i < my_map->hash; ++i)
       {
         if(!my_map->table[i].empty())
         {
           current = i;
-          cur_list_iter = my_map->table[current].begin();
+          cur_sub_iterator = my_map->table[current].begin();
           return *this;
         }
       }
       current = my_map->hash -1;
-      cur_list_iter = my_map->table[current].end();
+      cur_sub_iterator = my_map->table[current].end();
       return *this;
     }
   }
@@ -445,9 +444,9 @@ public:
     {
       throw std::out_of_range("HashMap::ConstIterator : can't increment begin()");
     }
-    else if(cur_list_iter != my_map->table[current].begin())
+    else if(cur_sub_iterator != my_map->table[current].begin())
     {
-      cur_list_iter--;
+      cur_sub_iterator--;
     }
     else
     {
@@ -460,20 +459,20 @@ public:
         }
       }while (current >= 0);
 
-      cur_list_iter = --(my_map->table[current].end());
+      cur_sub_iterator = --(my_map->table[current].end());
       */
       for(u_int i = current - 1; i > 0; --i)
       {
         if(!(my_map->table[i].empty()))
         {
           current = i;
-          cur_list_iter = (my_map->table[current].end());
-          --cur_list_iter;
+          cur_sub_iterator = (my_map->table[current].end());
+          --cur_sub_iterator;
           return *this;
         }
       }
       current = 0;
-      cur_list_iter = my_map->table[current].begin();//invalid?
+      cur_sub_iterator = my_map->table[current].begin();//invalid?
       return *this;
     }
     return *this;
@@ -492,12 +491,12 @@ public:
     {
       throw std::out_of_range("HashMap::ConstIterator : can't dereference end()");
     }
-    else if(cur_list_iter == my_map->table[current].end())
+    else if(cur_sub_iterator == my_map->table[current].end())
     {
       throw std::out_of_range("HashMap::ConstIterator : can't dereference because of wrong");
     } else
     {
-      return *cur_list_iter;
+      return *cur_sub_iterator;
     }
   }
 
@@ -508,7 +507,7 @@ public:
 
   bool operator==(const ConstIterator& other) const
   {
-    return (my_map == other.my_map && current == other.current && cur_list_iter == other.cur_list_iter);
+    return (my_map == other.my_map && current == other.current && cur_sub_iterator == other.cur_sub_iterator);
   }
 
   bool operator!=(const ConstIterator& other) const
@@ -516,9 +515,9 @@ public:
     return !(*this == other);
   }
 
-  list_iterator get_list_iterator() const
+  collection_iterator get_sub_iterator() const
   {
-    return cur_list_iter;
+    return cur_sub_iterator;
   }
 };
 
@@ -532,8 +531,8 @@ public:
   explicit Iterator()
   {}
 
-  Iterator(key_type current_c, list_iterator cur_list_iter_c, const HashMap *mymap_c = nullptr) :
-     ConstIterator(current_c, cur_list_iter_c, mymap_c)
+  Iterator(key_type current_c, collection_iterator cur_sub_iterator_c, const HashMap *mymap_c = nullptr) :
+     ConstIterator(current_c, cur_sub_iterator_c, mymap_c)
   {}
 
   Iterator(const ConstIterator& other)
@@ -580,4 +579,4 @@ public:
 
 }
 
-#endif /* AISDI_MAPS_HASHMAP_H */
+#endif /* ASSOCIATIVE_HASHMAP */
