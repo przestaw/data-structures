@@ -7,9 +7,10 @@
 #include <utility>
 #include <algorithm>
 
+#include "../../linear/src/LinkedList.h"
 #include <list>
 #define DEFAULT_HASH 250000
-#define COLLECTION std::list<value_type>
+#define COLLECTION linear::LinkedList<value_type>
 
 namespace associative
 {
@@ -155,9 +156,9 @@ public:
     {
       //typically insert
       key_type index = hash_value(key);
-      table[index].push_back(value_type(key, {}));
+      table[index].append(value_type(key, {}));
       count++;
-      return table[index].back().second;
+      return (*((table[index].end())-1)).second;
     }
     else
     {
@@ -186,7 +187,7 @@ public:
     else
     {
       key_type index = hash_value(key);
-      if(table[index].size() == 0)
+      if(table[index].getSize() == 0)
       {
         return cend();
       }
@@ -194,7 +195,7 @@ public:
       {
         for(auto it = table[index].begin(); it != table[index].end(); it++)
         {
-          if(it->first == key)
+          if((*it).first == key)
           {
             return const_iterator(index, it, this);
           }
@@ -213,7 +214,7 @@ public:
     else
     {
       key_type index = hash_value(key);
-      if(table[index].size() == 0)
+      if(table[index].getSize() == 0)
       {
         return end();
       }
@@ -221,7 +222,7 @@ public:
       {
         for(auto it = table[index].begin(); it != table[index].end(); it++)
         {
-          if(it->first == key)
+          if((*it).first == key)
           {
             return iterator(index, it, this);
           }
@@ -321,14 +322,14 @@ private:
   void insert(value_type ins_val)
   {
     key_type index = hash_value(ins_val.first);
-    table[index].push_back(ins_val);
+    table[index].append(ins_val);
     count++;
   }
 
   iterator find(value_type find_val)
   {
     key_type index = hash_value(find_val.first);
-    if(table[index].empty())
+    if(table[index].isEmpty())
     {
       return end();
     }
@@ -353,7 +354,7 @@ private:
   {
     for(uint i = 0; i < hash; i++)//why uint?
     {
-      if(table[i].size() > 0)
+      if(table[i].getSize() > 0)
       {
         return const_iterator(i, table[i].begin(), this);
       }
@@ -366,7 +367,7 @@ private:
   {
     for(uint i = 0; i < hash; i++)//why uint?
     {
-      if(!table[i].empty())
+      if(!table[i].isEmpty())
       {
         return iterator(i, table[i].begin(), this);
       }
@@ -429,7 +430,7 @@ public:
        */
       for(u_int i = current + 1; i < my_map->hash; ++i)
       {
-        if(!my_map->table[i].empty())
+        if(!my_map->table[i].isEmpty())
         {
           current = i;
           cur_sub_iterator = my_map->table[current].begin();
@@ -474,7 +475,7 @@ public:
       */
       for(u_int i = current - 1; i > 0; --i)
       {
-        if(!(my_map->table[i].empty()))
+        if(!(my_map->table[i].isEmpty()))
         {
           current = i;
           cur_sub_iterator = (my_map->table[current].end());
