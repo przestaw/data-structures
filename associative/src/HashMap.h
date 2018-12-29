@@ -8,7 +8,7 @@
 #include <algorithm>
 
 #include <list>
-#define DEFAULT_HASH 25000
+#define DEFAULT_HASH 250000
 #define COLLECTION std::list<value_type>
 
 namespace associative
@@ -56,12 +56,18 @@ public:
   {
     this->hash = other.hash;
     this->table = new collection[this->hash];
-    this->count = 0;
+    this->count = 0;//other.count;
 
     for(auto it = other.begin(); it != other.end(); ++it)
     {
       insert(*it);
     }
+/*
+    for(size_type i = hash; i > 0; i--)
+    {
+      this->table[i-1] = collection(other.table[i-1]);//because of OperationCountingObject
+    }
+*/
   }
 
   HashMap(HashMap&& other)
@@ -92,15 +98,20 @@ public:
     else
     {
       hash = other.hash;
-      count = 0;
+      count = 0;//other.count;
 
       if(table != nullptr)
       {
         delete[] table;
       }
       table = new collection[hash];
-
-      for (auto it = other.begin(); it != other.end(); ++it)
+/*
+      for(size_type i = hash; i > 0; i--)
+      {
+        this->table[i-1] = collection(other.table[i-1]);
+      }
+*/
+      for(auto it = other.begin(); it != other.end(); ++it)
       {
         insert(*it);
       }

@@ -621,6 +621,26 @@ namespace associative
                 case -1:
                   return;
                 case -2:
+                  switch(node->r_son->balance)
+                  {
+                    case 1:
+                      node->balance = 0;
+                      node->r_son->balance = 0;
+                      double_right_left(node);
+                      break;
+                    case 0:
+                      node->balance = -1;
+                      single_left(node);
+                      break;
+                    case -1:
+                      node->balance = 0;
+                      node->r_son->balance = 0;
+                      single_left(node);
+                      break;
+                  }
+                  balance_remove(temp, new_left);
+                  break;
+                  /*
                   node->balance = 0;
                   if(node->r_son->balance == -1)
                   {
@@ -632,8 +652,7 @@ namespace associative
                     node->r_son->balance = 0;
                     double_right_left(node);
                   }
-                  balance_remove(temp, new_left);
-                  break;
+                  */
               }
             }
             else
@@ -647,7 +666,25 @@ namespace associative
                 case 1:
                   return;
                 case 2:
-                  node->balance = 0;
+                  switch(node->l_son->balance)
+                  {
+                    case 1:
+                      node->balance = 0;
+                      node->l_son->balance = 0;
+                      single_right(node);
+                      break;
+                    case 0:
+                      node->balance = 1;
+                      single_right(node);
+                    case -1:
+                      node->balance = 0;
+                      node->l_son->balance = 0;
+                      double_left_right(node);
+                      break;
+                  }
+                  balance_remove(temp, new_left);
+                  break;
+                  /*
                   if(node->l_son->balance == 1)
                   {
                     node->l_son->balance = 0;
@@ -658,8 +695,7 @@ namespace associative
                     node->l_son->balance = 0;
                     double_left_right(node);
                   }
-                  balance_remove(temp, new_left);
-                  break;
+                  */
               }
             }
           }
@@ -667,7 +703,7 @@ namespace associative
 
     public:
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        void print_tree()
+        void print_tree() const
         {
           std::cout << "\t\t\t\t";
           print_node(tree_root);
@@ -732,7 +768,7 @@ namespace associative
           }
         }
 
-        void print_node(Node * node)
+        void print_node(Node * node) const
         {
           if(node != nullptr)
           {
@@ -813,7 +849,7 @@ namespace associative
 
         ConstIterator& operator--()
         {
-          if(my_tree == nullptr || my_tree->tree_root == nullptr)
+          if(my_tree == nullptr || my_tree->tree_root == nullptr || *this == my_tree->begin())
           {
             throw std::out_of_range("operator--");
           }

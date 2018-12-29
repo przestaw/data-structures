@@ -1,7 +1,5 @@
 #include <TreeMap.h>
 
-#include <cstdint>
-#include <string>
 #include <map>
 
 #include <boost/test/unit_test.hpp>
@@ -788,5 +786,85 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(GivenTwoMapsWithDifferentKeys_WhenComparingThem_Th
 
 // ConstIterator is tested via Iterator methods.
 // If Iterator methods are to be changed, then new ConstIterator tests are required.
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(GivenTwoMaps_WhenCreatingCopy_ViaIterator_Incrementing,
+                              K,
+                              TestedKeyTypes)
+{
+  const Map<K> map = {{1944, "Adolf"}, {1917, "Lenin"}, {1946, "Stalin"}, { 1939, "Hitler"}, {1941, "Joseph"}, { 42, "Alice" }, { 27, "Bob" }, { 13, "Chuck" }, {22, "Roman"} };
+  Map<K> post_copy;
+  Map<K> pre_copy;
+
+  for(auto it = map.begin(); it != map.end(); it++)
+  {
+    BOOST_CHECK_NO_THROW(post_copy[it->first] = it->second);
+  }
+
+  for(auto it = map.begin(); it != map.end(); ++it)
+  {
+    BOOST_CHECK_NO_THROW(pre_copy[it->first] = it->second);
+  }
+
+  BOOST_CHECK(map == post_copy);
+  BOOST_CHECK(map == pre_copy);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(GivenTwoMaps_WhenCreatingCopy_ViaIterator_Decrementing,
+                              K,
+                              TestedKeyTypes)
+{
+  const Map<K> map = {{1944, "Adolf"}, {1917, "Lenin"}, {1946, "Stalin"}, { 1939, "Hitler"}, {1941, "Joseph"}, { 42, "Alice" }, { 27, "Bob" }, { 13, "Chuck" }, {22, "Roman"} };
+  Map<K> post_copy;
+  Map<K> pre_copy;
+
+  for(auto it = map.end(); it != map.begin(); )
+  {
+    it--;
+    BOOST_CHECK_NO_THROW(post_copy[it->first] = it->second);
+  }
+
+  for(auto it = map.end(); it != map.begin(); )
+  {
+    --it;
+    BOOST_CHECK_NO_THROW(pre_copy[it->first] = it->second);
+  }
+
+  BOOST_CHECK(map == post_copy);
+  BOOST_CHECK(map == pre_copy);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(IteratorWorking_ItemReturned_AfterThrowing_IncrementingEnd,
+                              K,
+                              TestedKeyTypes)
+{
+  const Map<K> map = {{1917, "Lenin"}, {1944, "Adolf"}, {1946, "Stalin"}};
+  auto it1 = map.end();
+  auto it2 = map.end();
+
+  BOOST_CHECK_THROW(it1++, std::out_of_range);
+  it1--;
+  BOOST_CHECK_EQUAL((it1)->first, 1946);
+  BOOST_CHECK_EQUAL((it1)->second, "Stalin");
+  BOOST_CHECK_THROW(++it2, std::out_of_range);
+  --it2;
+  BOOST_CHECK_EQUAL((it2)->first, 1946);
+  BOOST_CHECK_EQUAL((it2)->second, "Stalin");
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(IteratorWorking_ItemReturned_AfterThrowing_DeccrementingBegin,
+                              K,
+                              TestedKeyTypes)
+{//helped to find a bug
+  const Map<K> map = {{1917, "Lenin"}, {1944, "Adolf"}, {1946, "Stalin"}};
+  auto it1 = map.begin();
+  auto it2 = map.begin();
+
+  BOOST_CHECK_THROW(it1--, std::out_of_range);
+  BOOST_CHECK_EQUAL((it1)->first, 1917);
+  BOOST_CHECK_EQUAL((it1)->second, "Lenin");
+  BOOST_CHECK_THROW(--it2, std::out_of_range);
+  BOOST_CHECK_EQUAL((it2)->first, 1917);
+  BOOST_CHECK_EQUAL((it2)->second, "Lenin");
+}
 
 BOOST_AUTO_TEST_SUITE_END()

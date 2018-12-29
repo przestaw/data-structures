@@ -13,7 +13,7 @@ using ListCollection = linear::LinkedList<T>;
 template <typename T>
 using VectorCollection = linear::Vector<T>;
 
-void prependTest(ListCollection<int> &list, VectorCollection<int> &vec, int count)
+void prepend_test(ListCollection<int> &list, VectorCollection<int> &vec, int count)
 {
   //list
 
@@ -43,7 +43,7 @@ void prependTest(ListCollection<int> &list, VectorCollection<int> &vec, int coun
     std::cout << "Finished prepend for vector - " << count << " elements, time : " << elapsedSecondsV.count() << "  - at time : " << std::ctime(&end_timeV) << std::endl;
 }
 
-void appendTest(ListCollection<int> &list, VectorCollection<int> &vec, int count)
+void append_test(ListCollection<int> &list, VectorCollection<int> &vec, int count)
 {
   //list
 
@@ -74,7 +74,7 @@ void appendTest(ListCollection<int> &list, VectorCollection<int> &vec, int count
 }
 
 
-void popFirstTest(ListCollection<int> list, VectorCollection<int> vec, int count)
+void popFirst_test(ListCollection<int> list, VectorCollection<int> vec, int count)
 {
   //list
 
@@ -104,7 +104,7 @@ void popFirstTest(ListCollection<int> list, VectorCollection<int> vec, int count
   std::cout << "Finished popFirst for vector - " << count << " elements, time : " << elapsedSecondsV.count()  << "  - at time : " << std::ctime(&end_timeV) << std::endl;
 }
 
-void popLastTest(ListCollection<int> list, VectorCollection<int> vec, int count)
+void popLast_test(ListCollection<int> list, VectorCollection<int> vec, int count)
 {
   //list
 
@@ -135,7 +135,7 @@ void popLastTest(ListCollection<int> list, VectorCollection<int> vec, int count)
 }
 
 
-void eraseTest(ListCollection <int> &l, VectorCollection <int> &v, int count)
+void erase_test(ListCollection <int> &l, VectorCollection <int> &v, int count)
 {
   auto start = std::chrono::system_clock::now();
   l.erase(l.begin(), l.end());
@@ -153,12 +153,12 @@ void eraseTest(ListCollection <int> &l, VectorCollection <int> &v, int count)
   std::chrono::duration<double> elapsedSecondsV = end - start;
   std::time_t end_timeV = std::chrono::system_clock::to_time_t(end);
 
-    std::cout << "Finished ERASE for vector - " << count << " elements, time : " << elapsedSecondsV.count() << "  - at time : " << std::ctime(&end_timeV) << std::endl;
+  std::cout << "Finished ERASE for vector - " << count << " elements, time : " << elapsedSecondsV.count() << "  - at time : " << std::ctime(&end_timeV) << std::endl;
 
 }
 
-  ListCollection <int> list;
-  VectorCollection <int> vec;
+ListCollection <int> list;
+VectorCollection <int> vec;
 
 int main()
 {
@@ -166,12 +166,12 @@ int main()
   for(int i : {100 , 1000, 10000})
   {
     std::cout << i <<" - + - + - + - + - + - + - + - + - + " << i << " + - + - + - + - + - + - + - + - + - "<< i <<"\n";
-    prependTest(list, vec, i);
-    popLastTest(list, vec, i);
-	  eraseTest(list, vec, i);
-    appendTest(list, vec, i);
-    popFirstTest(list, vec, i);
-	  eraseTest(list, vec, i);
+    prepend_test(list, vec, i);
+    popLast_test(list, vec, i);
+	  erase_test(list, vec, i);
+    append_test(list, vec, i);
+    popFirst_test(list, vec, i);
+	  erase_test(list, vec, i);
   }
 
   return 0;
