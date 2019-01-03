@@ -167,14 +167,28 @@ public:
 
   const mapped_type& valueOf(const key_type& key) const
   {
-    auto it = find(key); //cend()?
-    return it->second;
+    auto it = find(key);
+    if(it == end())
+    {
+      throw std::out_of_range("HashMap : no such element");
+    }
+    else
+    {
+      return it->second;
+    }
   }
 
   mapped_type& valueOf(const key_type& key)
   {
-    auto it = find(key); //end()?
-    return it->second;
+    auto it = find(key);
+    if(it == end())
+    {
+      throw std::out_of_range("HashMap : no such element");
+    }
+    else
+    {
+      return it->second;
+    }
   }
 
   const_iterator find(const key_type& key) const
@@ -233,7 +247,7 @@ public:
 
   void remove(const key_type& key)
   {
-    remove(find(key));
+    remove(find(key));//remove already handles cend()
   }
 
   void remove(const const_iterator& it)

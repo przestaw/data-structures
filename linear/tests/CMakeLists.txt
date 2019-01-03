@@ -3,7 +3,7 @@ find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 add_executable(linearTests test_main.cpp VectorTests.cpp LinkedListTests.cpp )
 target_link_libraries(linearTests ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
-add_test(boostUnitTestsRun linearTests)
+add_test(boostUnitTestsRun ${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/linearTests)
 
 if (CMAKE_CONFIGURATION_TYPES)
     add_custom_target(checkLinear COMMAND ${CMAKE_CTEST_COMMAND}

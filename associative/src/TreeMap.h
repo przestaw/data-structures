@@ -163,7 +163,7 @@ namespace associative
           const Node* current = find_node(key);
           if(current == nullptr)
           {
-            throw std::out_of_range("valueOf");
+            throw std::out_of_range("TreeMap : no such element");
           }
           else
           {
@@ -174,12 +174,22 @@ namespace associative
         mapped_type& valueOf(const key_type& key)
         {
           Node* current = find_node(key);
+          if(current == nullptr)
+          {
+            throw std::out_of_range("TreeMap : no such element");
+          }
+          else
+          {
+            return current->node_value.second;
+          }
+          /*
           if( current == nullptr )
           {
             current = new Node(key,mapped_type());
             insert( current );
           }
           return current->node_value.second;
+           */
         }
 
         const_iterator find(const key_type& key) const
@@ -809,9 +819,9 @@ namespace associative
 
         ConstIterator& operator++()
         {
-          if(my_tree == nullptr || actual == nullptr)
+          if(my_tree == nullptr || my_tree->tree_root == nullptr || actual == nullptr)
           {
-            throw std::out_of_range("operator++");
+            throw std::out_of_range("TreeMap : operator++");
           }
           else if( actual->r_son != nullptr )
           {
@@ -826,7 +836,7 @@ namespace associative
             {
               if(actual->papa == nullptr)
               {
-                actual = nullptr;
+                actual = nullptr;//we tried to increment the biggest element
                 break;
               }
               if(actual->papa->l_son == actual)
@@ -851,7 +861,7 @@ namespace associative
         {
           if(my_tree == nullptr || my_tree->tree_root == nullptr || *this == my_tree->begin())
           {
-            throw std::out_of_range("operator--");
+            throw std::out_of_range("TreeMap : operator--");
           }
           else if(actual == nullptr)
           {
@@ -872,9 +882,9 @@ namespace associative
           else {
             while(true)
             {
-              if(actual->papa == nullptr)
+              if(actual->papa == nullptr) //could not happen in valid tree -> possible only if we try to decrement smallest element
               {
-                throw std::out_of_range("operator--");
+                throw std::runtime_error("TreeMap : unknown error operator--");
               }
               if(actual->papa->r_son == actual)
               {

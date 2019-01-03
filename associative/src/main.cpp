@@ -144,11 +144,22 @@ TreeMap<int, std::string> tree;
 */
 int main()
 {
-  for(int i : {10 , 100, 1000, 10000})
+  for(int i : {100, 1000, 10000, 100000, 1000000, 10000000})
   {
-    HashMap<int, std::string> hash(3*i);//def hash is 6 times i - HashMap should be really fast for ~30% of usage
+    HashMap<int, std::string> hash(3*i);//def hash is 3 times i - HashMap should be really fast for ~30% of usage
     TreeMap<int, std::string> tree;
     std::cout << i << " - + - + - + - + - + - + - + - + - + " << i << " + - + - + - + - + - + - + - + - + - " << i << "\n";
+    operator_test(hash, tree, i);
+    find_test(hash, tree, i);
+    copy_test(hash, tree, i);
+    remove_test(hash, tree, i);
+  }
+
+  for(int i : {100, 1000, 10000, 100000, 1000000, 10000000})
+  {
+    HashMap<int, std::string> hash(i/5);//
+    TreeMap<int, std::string> tree;
+    std::cout << i << " | | | | | | | | | | | | | | | | | |  " << i << " | | | | | | | | | | | | | | | | | |  " << i << "\n";
     operator_test(hash, tree, i);
     find_test(hash, tree, i);
     copy_test(hash, tree, i);
